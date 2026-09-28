@@ -59,9 +59,15 @@
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
         ],
+        "tinymce-assets": [
+            "@php -r \"if(is_dir('vendor/tinymce/tinymce') && !file_exists('public/vendor/tinymce/tinymce.min.js')){ @mkdir('public/vendor/tinymce', 0755, true); exec('cp -R vendor/tinymce/tinymce/* public/vendor/tinymce/'); }\""
+        ],
+        "post-install-cmd": [
+            "@tinymce-assets"
+        ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php -r \"if(is_dir('vendor/tinymce/tinymce') && !file_exists('public/vendor/tinymce/tinymce.min.js')){ @mkdir('public/vendor/tinymce', 0755, true); exec('cp -R vendor/tinymce/tinymce/* public/vendor/tinymce/'); }\""
+            "@tinymce-assets"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
