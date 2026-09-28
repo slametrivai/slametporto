@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        overflow-x: clip;
+        background-color: theme('colors.void');
+        color: theme('colors.content.DEFAULT');
+    }
+    body {
+        overflow-x: clip;
+        background-color: theme('colors.void');
+        color: theme('colors.content.DEFAULT');
+    }
+    ::selection {
+        background-color: theme('colors.accent.DEFAULT');
+        color: theme('colors.void');
+    }
+    /* One visible focus style for every link, button and field (18.5:1 on navy). */
+    :focus-visible {
+        outline: 2px solid theme('colors.accent.DEFAULT');
+        outline-offset: 2px;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: theme('colors.void');
+}
+::-webkit-scrollbar-thumb {
+    background: theme('colors.edge');
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.accent.deep');
+}

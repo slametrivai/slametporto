@@ -1,0 +1,183 @@
+@config "../../tailwind.admin.config.js";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-gray-50 font-outfit font-normal text-gray-700;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+/*
+ * TailAdmin v2 patterns. Deviations from the template, all for WCAG AA (R-25/R-03):
+ * active/brand text uses brand-600 (brand-500 is 4.34:1 on brand-50), badges use -700 text,
+ * helper text and placeholders use gray-500 (gray-400 is 2.58:1), focus border is brand-500,
+ * and menu items / buttons are at least 44px tall.
+ */
+@layer components {
+    .menu-item {
+        @apply relative flex items-center gap-3 rounded-lg px-3 py-3 text-theme-sm font-medium;
+    }
+    .menu-item-active {
+        @apply bg-brand-50 text-brand-600;
+    }
+    .menu-item-inactive {
+        @apply text-gray-700 hover:bg-gray-100 hover:text-gray-700;
+    }
+    .menu-item-icon-active {
+        @apply text-brand-600;
+    }
+    .menu-item-icon-inactive {
+        @apply text-gray-500 group-hover:text-gray-700;
+    }
+
+    .admin-card {
+        @apply rounded-2xl border border-gray-200 bg-white;
+    }
+    .admin-card-header {
+        @apply flex flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5;
+    }
+    .admin-card-title {
+        @apply text-base font-medium text-gray-800;
+    }
+    .admin-card-desc {
+        @apply mt-1 text-theme-sm text-gray-500;
+    }
+    .admin-card-body {
+        @apply space-y-6 border-t border-gray-100 p-5 sm:p-6;
+    }
+
+    .admin-label {
+        @apply mb-1.5 block text-sm font-medium text-gray-700;
+    }
+    .admin-input {
+        @apply h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-500 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+    }
+    .admin-select {
+        @apply admin-input pr-11;
+    }
+    .admin-textarea {
+        @apply w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-500 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+    }
+    .admin-file {
+        @apply h-11 w-full cursor-pointer overflow-hidden rounded-lg border border-gray-300 bg-transparent text-sm text-gray-500 shadow-theme-xs transition-colors file:mr-5 file:h-full file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-gray-200 file:bg-gray-50 file:px-3.5 file:text-sm file:text-gray-700 hover:file:bg-gray-100 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+    }
+    .admin-checkbox {
+        @apply h-5 w-5 cursor-pointer rounded border-gray-300 text-brand-500 focus:ring-3 focus:ring-brand-500/20 focus:ring-offset-0;
+    }
+    .admin-help {
+        @apply mt-1.5 text-theme-xs text-gray-500;
+    }
+    .admin-error {
+        @apply mt-1.5 text-theme-xs text-error-600;
+    }
+
+    .admin-btn {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium shadow-theme-xs transition focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
+    }
+    .admin-btn-primary {
+        @apply admin-btn bg-brand-500 text-white hover:bg-brand-600;
+    }
+    .admin-btn-outline {
+        @apply admin-btn bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50;
+    }
+    .admin-icon-btn {
+        @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 shadow-theme-xs transition hover:bg-gray-50 hover:text-gray-800 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
+    }
+    .admin-icon-btn-danger {
+        @apply hover:bg-error-50 hover:text-error-600;
+    }
+    .admin-link {
+        @apply font-medium text-brand-600 hover:underline focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
+    }
+
+    .admin-badge {
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-theme-xs font-medium;
+    }
+    .admin-badge-success {
+        @apply bg-success-50 text-success-700;
+    }
+    .admin-badge-warning {
+        @apply bg-warning-50 text-warning-700;
+    }
+    .admin-badge-error {
+        @apply bg-error-50 text-error-700;
+    }
+    .admin-badge-brand {
+        @apply bg-brand-50 text-brand-600;
+    }
+    .admin-badge-gray {
+        @apply bg-gray-100 text-gray-700;
+    }
+
+    .admin-alert-success {
+        @apply rounded-xl border border-success-500 bg-success-50 p-4 text-sm text-gray-800;
+    }
+    .admin-alert-error {
+        @apply rounded-xl border border-error-500 bg-error-50 p-4 text-sm text-gray-800;
+    }
+}
+
+/* DataTables 1.13 (CDN css stays for sort icons and the processing box; its colors use !important). */
+.dataTables_wrapper {
+    @apply text-theme-sm text-gray-500;
+}
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+    @apply inline-flex items-center gap-2 text-theme-sm text-gray-500;
+}
+.dataTables_wrapper .dataTables_length select {
+    @apply h-11 rounded-lg border border-gray-300 bg-transparent py-0 pl-3 pr-8 text-sm text-gray-800 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+}
+.dataTables_wrapper .dataTables_filter input {
+    @apply ml-0 h-11 w-56 rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+}
+.dataTables_wrapper table.dataTable {
+    @apply my-0 w-full;
+}
+.dataTables_wrapper table.dataTable.no-footer {
+    @apply border-b border-gray-100;
+}
+.dataTables_wrapper table.dataTable thead th {
+    @apply whitespace-nowrap border-y border-gray-100 px-4 py-3 text-left text-theme-xs font-medium text-gray-500;
+}
+.dataTables_wrapper table.dataTable thead th.sorting,
+.dataTables_wrapper table.dataTable thead th.sorting_asc,
+.dataTables_wrapper table.dataTable thead th.sorting_desc {
+    @apply pr-8;
+}
+.dataTables_wrapper table.dataTable tbody td {
+    @apply border-b border-gray-100 px-4 py-3 align-middle text-theme-sm text-gray-500;
+}
+.dataTables_wrapper table.dataTable tbody tr:last-child td {
+    @apply border-b-0;
+}
+.dataTables_wrapper table.dataTable tbody tr:hover > td {
+    @apply bg-gray-50;
+}
+.dataTables_wrapper .dataTables_info {
+    @apply p-0 text-theme-sm text-gray-500;
+}
+.dataTables_wrapper .dataTables_paginate {
+    @apply flex flex-wrap items-center gap-1 p-0;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    @apply m-0 inline-flex h-11 min-w-11 items-center justify-center rounded-lg !border-0 !bg-none px-3 text-sm font-medium !text-gray-700 hover:!bg-brand-50 hover:!text-brand-600;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    @apply !bg-brand-500 !text-white;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+    @apply cursor-not-allowed !bg-transparent !text-gray-500 opacity-60;
+}
+.dataTables_wrapper .dataTables_processing {
+    @apply rounded-xl border border-gray-200 bg-white text-theme-sm text-gray-700 shadow-theme-lg;
+}
