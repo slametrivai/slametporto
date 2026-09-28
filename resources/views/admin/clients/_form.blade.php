@@ -42,8 +42,8 @@
                     <img src="{{ $client->logo_url }}" alt="Logo saat ini" class="max-h-full max-w-full object-contain">
                 </div>
             @endif
-            <input id="logo" type="file" name="logo" accept=".svg,.png,.jpg,.jpeg,.webp" @required(!$client) class="admin-file" aria-describedby="logo-help">
-            <p id="logo-help" class="admin-help">SVG, PNG, JPG, atau WEBP.{{ $client ? ' Kosongkan jika tidak mengganti logo.' : '' }}</p>
+            <input id="logo" type="file" name="logo" accept=".svg,.png,.jpg,.jpeg,.webp" @required(!$client) data-shrink class="admin-file" aria-describedby="logo-help">
+            <p id="logo-help" class="admin-help">SVG, PNG, JPG, atau WEBP. Maks. 2 MB; gambar yang lebih besar otomatis diperkecil.{{ $client ? ' Kosongkan jika tidak mengganti logo.' : '' }}</p>
         </div>
 
         <div>

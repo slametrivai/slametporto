@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <div class="rounded-xl border border-gray-200 p-4">
+                    <div class="rounded-xl border border-gray-200 p-4" data-upload-field>
                         <p class="admin-label">Logo</p>
                         <div class="flex items-center gap-4">
                             <div class="flex h-14 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-1">
@@ -46,7 +46,7 @@
                             </div>
                             <label class="admin-btn-outline cursor-pointer focus-within:ring-3 focus-within:ring-brand-500/40">
                                 Pilih logo
-                                <input type="file" name="site_logo" accept="image/*" class="sr-only" @change="logoPreview = preview($event)">
+                                <input type="file" name="site_logo" accept="image/*" data-shrink class="sr-only" @change="logoPreview = preview($event)">
                             </label>
                         </div>
                         @if(!empty($settings['site_logo']))

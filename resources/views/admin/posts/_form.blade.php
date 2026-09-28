@@ -137,7 +137,7 @@
             <div class="admin-card-header">
                 <h3 class="admin-card-title">Gambar cover</h3>
             </div>
-            <div class="admin-card-body">
+            <div class="admin-card-body" data-upload-field>
                 <template x-if="coverPreview">
                     <img :src="coverPreview" alt="Pratinjau cover baru" class="h-36 w-full rounded-lg border border-gray-200 object-cover">
                 </template>
@@ -147,8 +147,8 @@
 
                 <label class="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center transition hover:border-brand-500 focus-within:border-brand-500 focus-within:ring-3 focus-within:ring-brand-500/20">
                     <span class="text-sm font-medium text-gray-800">{{ $post?->cover_image ? 'Ganti gambar' : 'Pilih gambar' }}</span>
-                    <span class="mt-1 text-theme-xs text-gray-500">PNG, JPG, SVG, atau WEBP. Maks. 2 MB.</span>
-                    <input type="file" name="cover_image" accept="image/*,.svg" class="sr-only" @change="previewCover($event)">
+                    <span class="mt-1 text-theme-xs text-gray-500">PNG, JPG, SVG, atau WEBP. Maks. 2 MB; foto yang lebih besar otomatis diperkecil.</span>
+                    <input type="file" name="cover_image" accept="image/*,.svg" data-shrink class="sr-only" @change="previewCover($event)">
                 </label>
             </div>
         </div>

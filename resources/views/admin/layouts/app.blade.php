@@ -227,6 +227,71 @@
             });
         }
     </script>
+    <script>
+        // Phone photos are 3-10 MB; the server accepts 2 MB and the production proxy drops big
+        // bodies mid-upload (ERR_HTTP2_PING_FAILED). Shrink [data-shrink] images before submit.
+        const UPLOAD_MAX = 2 * 1024 * 1024;
+        const MAX_SIDE = 1920;
+        const formatSize = (b) => b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.round(b / 1024) + ' KB';
+        const canvasToBlob = (canvas, type) => new Promise((resolve) => canvas.toBlob(resolve, type, 0.85));
+
+        async function shrinkImage(file) {
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) return file; // SVG/GIF/ICO as-is
+            const img = await createImageBitmap(file);
+            const scale = Math.min(1, MAX_SIDE / Math.max(img.width, img.height));
+            if (scale === 1 && file.size <= 500 * 1024) return file;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // toBlob silently falls back to PNG when WebP encoding is unsupported (Safari).
+            let blob = await canvasToBlob(canvas, 'image/webp');
+            if (blob?.type !== 'image/webp' && file.type === 'image/jpeg') blob = await canvasToBlob(canvas, 'image/jpeg');
+            if (!blob || blob.size >= file.size) return file;
+
+            return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.' + blob.type.split('/')[1], { type: blob.type });
+        }
+
+        document.addEventListener('change', async (e) => {
+            const input = e.target;
+            if (!input.matches('input[type="file"][data-shrink]') || !input.files.length) return;
+
+            const field = input.closest('[data-upload-field]') ?? input.parentElement;
+            let note = field.querySelector('[data-upload-note]');
+            if (!note) {
+                note = document.createElement('p');
+                note.setAttribute('data-upload-note', '');
+                note.setAttribute('role', 'status');
+                field.appendChild(note);
+            }
+            const submits = input.form ? [...input.form.querySelectorAll('[type="submit"]')] : [];
+            submits.forEach((b) => { b.disabled = true; });
+            note.className = 'admin-help';
+            note.textContent = 'Memproses gambar...';
+
+            const original = input.files[0];
+            let file = original;
+            try { file = await shrinkImage(original); } catch (err) { file = original; }
+            submits.forEach((b) => { b.disabled = false; });
+
+            if (file.size > UPLOAD_MAX) {
+                input.value = '';
+                note.className = 'admin-error';
+                note.textContent = `Gambar ${formatSize(file.size)} terlalu besar (maks. 2 MB). Pilih file yang lebih kecil.`;
+                return;
+            }
+            if (file !== original) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                input.files = dt.files;
+                note.textContent = `Diperkecil otomatis dari ${formatSize(original.size)} menjadi ${formatSize(file.size)}.`;
+            } else {
+                note.textContent = `${formatSize(file.size)}, siap diunggah.`;
+            }
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

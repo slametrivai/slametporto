@@ -114,8 +114,8 @@
                 @if($project?->cover_image)
                     <img src="{{ $project->cover_image_url }}" alt="Cover saat ini" class="mb-3 h-24 w-40 rounded-lg border border-gray-200 object-cover">
                 @endif
-                <input id="cover_image" type="file" name="cover_image" accept="image/*,.svg" class="admin-file" aria-describedby="cover-help">
-                <p id="cover-help" class="admin-help">Opsional.{{ $project ? ' Kosongkan jika tidak mengganti cover.' : '' }}</p>
+                <input id="cover_image" type="file" name="cover_image" accept="image/*,.svg" data-shrink class="admin-file" aria-describedby="cover-help">
+                <p id="cover-help" class="admin-help">Opsional. Maks. 2 MB; foto yang lebih besar otomatis diperkecil sebelum diunggah.{{ $project ? ' Kosongkan jika tidak mengganti cover.' : '' }}</p>
             </div>
 
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
