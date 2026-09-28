@@ -250,14 +250,15 @@
             <p class="{{ $lead }}">Companies, healthcare networks, and scale-ups where operational architectures and automation workflows have been deployed.</p>
         </div>
 
-        <div class="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {{-- Cards size to the client name (no ellipsis); a name only wraps when it is wider than the screen. --}}
+        <div class="mt-12 flex flex-wrap justify-center gap-4">
             @foreach($clients as $client)
-                <div class="group {{ $card }} flex flex-col items-center justify-center p-4 text-center transition hover:border-accent-deep">
+                <div class="group {{ $card }} flex min-w-40 max-w-full flex-col items-center justify-center p-4 text-center transition hover:border-accent-deep">
                     <div class="flex h-16 w-full items-center justify-center grayscale transition group-hover:grayscale-0">
                         <img src="{{ $client->logo_url }}" alt="{{ $client->name }}" class="max-h-12 max-w-full object-contain">
                     </div>
-                    <p class="mt-3 w-full truncate text-sm font-bold text-content">{{ $client->name }}</p>
-                    <p class="mt-0.5 w-full truncate text-xs text-content-secondary">{{ $client->industry }}</p>
+                    <p class="mt-3 break-words text-sm font-bold text-content">{{ $client->name }}</p>
+                    <p class="mt-0.5 break-words text-xs text-content-secondary">{{ $client->industry }}</p>
                 </div>
             @endforeach
         </div>
