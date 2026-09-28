@@ -87,6 +87,9 @@
     .admin-btn-outline {
         @apply admin-btn bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50;
     }
+    .admin-btn-danger {
+        @apply admin-btn bg-error-600 text-white hover:bg-error-700;
+    }
     .admin-icon-btn {
         @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 shadow-theme-xs transition hover:bg-gray-50 hover:text-gray-800 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
     }

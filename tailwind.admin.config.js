@@ -6,6 +6,7 @@ import forms from '@tailwindcss/forms';
 export default {
     content: [
         './resources/views/admin/**/*.blade.php',
+        './resources/views/profile/**/*.blade.php',
         './app/Http/Controllers/Admin/**/*.php',
     ],
 
