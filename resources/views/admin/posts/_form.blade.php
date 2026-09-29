@@ -28,6 +28,7 @@
 
                 <div>
                     <label for="content" class="admin-label">Isi artikel <span class="text-error-600">*</span></label>
+                    <p class="admin-help mb-2 mt-0">Beri judul tiap bagian lewat menu format: Subjudul (Heading 2) atau Sub-subjudul (Heading 3). Subjudul itulah yang muncul sebagai Table of Contents di halaman artikel.</p>
                     <textarea id="content" name="content" rows="18">{{ old('content', $post?->content) }}</textarea>
                 </div>
             </div>
@@ -166,6 +167,8 @@ document.addEventListener('DOMContentLoaded', function () {
         branding: false,
         height: 520,
         menubar: 'file edit view insert format tools table help',
+        // H1 is the page title and the article TOC reads h2/h3, so only offer those levels.
+        block_formats: 'Paragraf=p; Subjudul (Heading 2)=h2; Sub-subjudul (Heading 3)=h3; Kutipan=blockquote',
         plugins: [
             'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
             'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',

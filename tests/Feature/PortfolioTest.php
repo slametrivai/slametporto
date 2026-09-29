@@ -107,6 +107,17 @@ class PortfolioTest extends TestCase
         $this->assertEquals($initialViews + 1, $post->fresh()->views_count);
     }
 
+    public function test_blog_table_of_contents_only_renders_when_article_has_headings(): void
+    {
+        $post = Post::published()->first();
+
+        $post->update(['content' => '<p>Only paragraphs, no sections.</p>']);
+        $this->get('/blog/' . $post->slug)->assertOk()->assertDontSee('Table of Contents');
+
+        $post->update(['content' => "<h2>Why it matters</h2><p>Body.</p>\n\n## Markdown section\n\nMore body."]);
+        $this->get('/blog/' . $post->slug)->assertOk()->assertSee('Table of Contents')->assertSee('id="table-of-contents"', false);
+    }
+
     public function test_contact_form_submission(): void
     {
         $data = [

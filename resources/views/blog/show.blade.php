@@ -8,6 +8,7 @@
     $shareBtn = 'inline-flex h-11 w-11 items-center justify-center rounded-lg border border-edge bg-surface text-content-secondary transition hover:border-accent-deep hover:text-accent';
     $shareText = rawurlencode($post->title);
     $shareUrl = rawurlencode(url()->current());
+    $hasSections = preg_match('/<h[23][\s>]/i', $htmlContent) === 1;
 @endphp
 
 @section('content')
@@ -72,7 +73,7 @@
 
     <div class="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-12">
         <div class="lg:col-span-8">
-            <div id="article-body" class="prose prose-invert max-w-none lg:prose-lg prose-headings:font-bold prose-headings:tracking-tight prose-a:text-accent-soft hover:prose-a:text-accent prose-pre:rounded-xl prose-pre:border prose-pre:border-edge prose-pre:bg-surface">
+            <div id="article-body" class="prose prose-invert max-w-none lg:prose-lg prose-headings:scroll-mt-24 prose-headings:font-bold prose-headings:tracking-tight prose-a:text-accent-soft hover:prose-a:text-accent prose-pre:rounded-xl prose-pre:border prose-pre:border-edge prose-pre:bg-surface">
                 {!! $htmlContent !!}
             </div>
 
@@ -88,11 +89,15 @@
             </div>
         </div>
 
-        <aside class="space-y-8 lg:col-span-4">
-            <nav class="sticky top-24 rounded-2xl border border-edge bg-surface p-6" aria-labelledby="toc-title">
-                <h2 id="toc-title" class="mb-4 text-sm font-semibold text-content">Table of Contents</h2>
-                <div id="table-of-contents" class="space-y-2 text-sm"></div>
-            </nav>
+        {{-- Below lg the aside dissolves (display: contents) so the TOC can sit above the article
+             while Related Articles stays below it; from lg it is the usual sticky sidebar. --}}
+        <aside class="contents lg:col-span-4 lg:block lg:space-y-8">
+            @if($hasSections)
+                <nav class="order-first rounded-2xl border border-edge bg-surface p-6 lg:sticky lg:top-24 lg:order-none" aria-labelledby="toc-title">
+                    <h2 id="toc-title" class="mb-4 text-sm font-semibold text-content">Table of Contents</h2>
+                    <div id="table-of-contents" class="space-y-2 text-sm"></div>
+                </nav>
+            @endif
 
             @if($relatedPosts->isNotEmpty())
                 <div class="rounded-2xl border border-edge bg-surface p-6">
@@ -121,16 +126,10 @@ document.addEventListener('DOMContentLoaded', () => {
         progress.style.width = (docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0) + '%';
     }, { passive: true });
 
-    const articleBody = document.getElementById('article-body');
     const toc = document.getElementById('table-of-contents');
-    const headings = articleBody.querySelectorAll('h2, h3');
+    if (!toc) return; // rendered only when the article has h2/h3 headings
 
-    if (headings.length === 0) {
-        toc.innerHTML = '<p class="text-content-secondary">This article has no sections.</p>';
-        return;
-    }
-
-    headings.forEach((heading, idx) => {
+    document.getElementById('article-body').querySelectorAll('h2, h3').forEach((heading, idx) => {
         heading.id = 'heading-' + idx;
         const link = document.createElement('a');
         link.href = '#' + heading.id;
