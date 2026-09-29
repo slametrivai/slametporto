@@ -93,9 +93,16 @@
              while Related Articles stays below it; from lg it is the usual sticky sidebar. --}}
         <aside class="contents lg:col-span-4 lg:block lg:space-y-8">
             @if($hasSections)
-                <nav class="order-first rounded-2xl border border-edge bg-surface p-6 lg:sticky lg:top-24 lg:order-none" aria-labelledby="toc-title">
-                    <h2 id="toc-title" class="mb-4 text-sm font-semibold text-content">Table of Contents</h2>
-                    <div id="table-of-contents" class="space-y-2 text-sm"></div>
+                {{-- Collapsible so a long TOC never pushes the article off screen; the list scrolls
+                     inside the box (60vh on mobile, rest of the viewport under the sticky header on lg). --}}
+                <nav class="order-first lg:sticky lg:top-24 lg:order-none" aria-labelledby="toc-title">
+                    <details id="toc" class="group rounded-2xl border border-edge bg-surface">
+                        <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-6 py-4 [&::-webkit-details-marker]:hidden">
+                            <h2 id="toc-title" class="text-sm font-semibold text-content">Table of Contents</h2>
+                            <svg class="h-5 w-5 shrink-0 text-content-secondary transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </summary>
+                        <div id="table-of-contents" class="max-h-[60vh] space-y-2 overflow-y-auto border-t border-edge px-6 py-4 text-sm lg:max-h-[calc(100vh-12rem)]"></div>
+                    </details>
                 </nav>
             @endif
 
@@ -128,6 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const toc = document.getElementById('table-of-contents');
     if (!toc) return; // rendered only when the article has h2/h3 headings
+
+    // Open beside the article on desktop; collapsed above it on mobile, closing again after a jump.
+    const tocBox = document.getElementById('toc');
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    tocBox.open = desktop.matches;
+    toc.addEventListener('click', (e) => {
+        if (e.target.closest('a') && !desktop.matches) tocBox.open = false;
+    });
 
     document.getElementById('article-body').querySelectorAll('h2, h3').forEach((heading, idx) => {
         heading.id = 'heading-' + idx;
