@@ -38,20 +38,21 @@ class ClientController extends Controller
                     return view('admin.partials.row-actions', [
                         'id' => $row->id,
                         'name' => $row->name,
-                        'edit' => route('admin.clients.edit', $row->id),
+                        'editModal' => $row->only(['id', 'name', 'industry', 'website_url', 'is_active', 'sort_order']) + ['logo_url' => $row->logo_url],
                     ])->render();
                 })
                 ->rawColumns(['logo', 'industry', 'is_active', 'action'])
                 ->make(true);
         }
 
-        return view('admin.clients.index');
-    }
+        // Category names plus any industry already on a client, so editing never drops a value.
+        $industries = Category::forClients()->pluck('name')
+            ->merge(Client::query()->distinct()->pluck('industry'))
+            ->filter()->unique()->sort()->values();
 
-    public function create(): View
-    {
-        $categories = Category::forClients()->orderBy('name')->pluck('name')->toArray();
-        return view('admin.clients.create', compact('categories'));
+        return view('admin.clients.index', [
+            'industries' => $industries->isEmpty() ? collect(['General Ecosystem']) : $industries,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -72,20 +73,12 @@ class ClientController extends Controller
             'industry' => $validated['industry'],
             'logo' => $logoPath,
             'website_url' => $validated['website_url'] ?? null,
-            'is_active' => $request->boolean('is_active', true),
+            'is_active' => $request->boolean('is_active'), // unchecked boxes are not sent, so no default
+
             'sort_order' => $validated['sort_order'] ?? 0,
         ]);
 
         return redirect()->route('admin.clients.index')->with('success', 'Klien baru berhasil ditambahkan!');
-    }
-
-    public function edit(Client $client): View
-    {
-        $categories = Category::forClients()->orderBy('name')->pluck('name')->toArray();
-        if (!in_array($client->industry, $categories) && !empty($client->industry)) {
-            array_unshift($categories, $client->industry);
-        }
-        return view('admin.clients.edit', compact('client', 'categories'));
     }
 
     public function update(Request $request, Client $client): RedirectResponse

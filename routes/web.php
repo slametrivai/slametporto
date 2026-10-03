@@ -46,7 +46,8 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('projects', ProjectController::class)->except(['show']);
 
     // Clients CRUD
-    Route::resource('clients', ClientController::class)->except(['show']);
+    // Add/edit happen in a modal on the index page.
+    Route::resource('clients', ClientController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // Blog Posts CRUD
     Route::resource('posts', PostController::class)->except(['show']);
@@ -55,7 +56,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::resource('categories', CategoryController::class)->except(['show']);
 
     // Career Timeline CRUD
-    Route::resource('careers', CareerController::class)->except(['show']);
+    // Add/edit happen in a modal on the index page, so there are no create/edit pages.
+    // reorder must be registered before the resource or PATCH careers/{career} would catch it.
+    Route::patch('careers/reorder', [CareerController::class, 'reorder'])->name('careers.reorder');
+    Route::resource('careers', CareerController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // Certifications & Credentials CRUD
     Route::resource('certifications', CertificationController::class)->except(['show']);

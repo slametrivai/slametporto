@@ -7,82 +7,56 @@ use App\Models\Career;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use Yajra\DataTables\Facades\DataTables;
 
 class CareerController extends Controller
 {
-    public function index(Request $request): View|JsonResponse
+    private const RULES = [
+        'period' => 'required|string|max:100',
+        'role' => 'required|string|max:150',
+        'company' => 'required|string|max:150',
+        'description' => 'nullable|string',
+    ];
+
+    public function index(): View
     {
-        if ($request->ajax()) {
-            $data = Career::select(['id', 'period', 'role', 'company', 'description', 'sort_order']);
+        $careers = Career::orderBy('sort_order')->orderBy('id')->get();
 
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->editColumn('company', function ($row) {
-                    return '<span class="font-medium text-gray-800">'.e($row->company).'</span>';
-                })
-                ->editColumn('period', function ($row) {
-                    return '<span class="admin-badge admin-badge-gray">'.e($row->period).'</span>';
-                })
-                ->addColumn('action', function ($row) {
-                    return view('admin.partials.row-actions', [
-                        'id' => $row->id,
-                        'name' => $row->company,
-                        'edit' => route('admin.careers.edit', $row->id),
-                    ])->render();
-                })
-                ->rawColumns(['company', 'period', 'action'])
-                ->make(true);
-        }
-
-        return view('admin.careers.index');
-    }
-
-    public function create(): View
-    {
-        return view('admin.careers.create');
+        return view('admin.careers.index', compact('careers'));
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'period' => 'required|string|max:100',
-            'role' => 'required|string|max:150',
-            'company' => 'required|string|max:150',
-            'description' => 'nullable|string',
-            'sort_order' => 'nullable|integer',
-        ]);
+        $validated = $request->validate(self::RULES);
 
-        Career::create([
-            'period' => $validated['period'],
-            'role' => $validated['role'],
-            'company' => $validated['company'],
-            'description' => $validated['description'] ?? null,
-            'sort_order' => $validated['sort_order'] ?? 0,
-        ]);
+        // New entries go to the end; the order is changed by dragging on the index page.
+        Career::create($validated + ['sort_order' => (int) Career::max('sort_order') + 1]);
 
         return redirect()->route('admin.careers.index')->with('success', 'Riwayat karier berhasil ditambahkan!');
     }
 
-    public function edit(Career $career): View
-    {
-        return view('admin.careers.edit', compact('career'));
-    }
-
     public function update(Request $request, Career $career): RedirectResponse
     {
-        $validated = $request->validate([
-            'period' => 'required|string|max:100',
-            'role' => 'required|string|max:150',
-            'company' => 'required|string|max:150',
-            'description' => 'nullable|string',
-            'sort_order' => 'nullable|integer',
-        ]);
-
-        $career->update($validated);
+        $career->update($request->validate(self::RULES));
 
         return redirect()->route('admin.careers.index')->with('success', 'Riwayat karier berhasil diperbarui!');
+    }
+
+    public function reorder(Request $request): JsonResponse
+    {
+        $ids = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|distinct|exists:careers,id',
+        ])['ids'];
+
+        DB::transaction(function () use ($ids) {
+            foreach ($ids as $position => $id) {
+                Career::whereKey($id)->update(['sort_order' => $position + 1]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Urutan karier tersimpan.']);
     }
 
     public function destroy(Career $career): JsonResponse|RedirectResponse
