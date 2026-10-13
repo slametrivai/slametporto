@@ -33,10 +33,17 @@ class PortfolioTest extends TestCase
         $response->assertSee('Slamet Rivai');
         $response->assertSee('Operations &amp; Systems Leader', false);
         $response->assertSee('Bekasi, Indonesia');
-        $response->assertSee('Customer Operations');
-        $response->assertSee('CRM Architecture');
-        $response->assertSee('Workflow Automation');
-        $response->assertSee('People Development');
+        $response->assertSeeInOrder([
+            'Systems that moved the numbers',
+            '9 years of making operations measurable.',
+            'The stack I run operations on',
+            'Certified, and verifiable',
+            'Organizations where my operations and automation work went live',
+            'Field notes from the ops floor',
+        ]);
+        // Featured case study with its pipeline, and the career win pills from the seeder.
+        $response->assertSee(Project::where('is_featured', true)->orderBy('sort_order')->first()->title);
+        $response->assertSee('99.8% SLA');
     }
 
     public function test_resume_page_renders_successfully(): void
@@ -57,15 +64,29 @@ class PortfolioTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee($project->title);
         $response->assertSee($project->role);
-        $response->assertSee('The Engineered Systems Solution');
+        $response->assertSeeInOrder(['How work moves through the pipeline', 'The challenge', 'The solution', 'The result', 'Overview', 'More case studies']);
+        $response->assertSee('from up to 48 hours of latency');
+        $response->assertSee('Computer-vision OCR');
+    }
+
+    public function test_case_study_without_optional_fields_hides_their_sections(): void
+    {
+        $project = Project::where('slug', 'dynamic-workforce-roster-shift-allocation-matrix')->first();
+
+        $this->get('/projects/' . $project->slug)
+            ->assertOk()
+            ->assertSee('The solution')
+            ->assertDontSee('The result')
+            ->assertDontSee('Key components')
+            ->assertDontSee('Screens from the live system');
     }
 
     public function test_projects_index_and_search_and_filter(): void
     {
         $response = $this->get('/projects');
         $response->assertStatus(200);
-        $response->assertSee('Featured Systems &amp; Case Studies', false);
-        $response->assertSee('Operational Engineering');
+        $response->assertSee('Production systems behind the numbers');
+        $response->assertSee('Sort: Featured first');
 
         // Filter by category
         $project = Project::first();
@@ -83,8 +104,8 @@ class PortfolioTest extends TestCase
     {
         $response = $this->get('/blog');
         $response->assertStatus(200);
-        $response->assertSee('Knowledge Base');
-        $response->assertSee('Operations & Systems Notes', false);
+        $response->assertSee('Field notes from the ops floor');
+        $response->assertSee('Browse by topic');
 
         // Filter by category
         $responseCat = $this->get('/blog?category=workflow-automation');
@@ -112,10 +133,12 @@ class PortfolioTest extends TestCase
         $post = Post::published()->first();
 
         $post->update(['content' => '<p>Only paragraphs, no sections.</p>']);
-        $this->get('/blog/' . $post->slug)->assertOk()->assertDontSee('Table of Contents');
+        $this->get('/blog/' . $post->slug)->assertOk()->assertDontSee('On this page');
 
         $post->update(['content' => "<h2>Why it matters</h2><p>Body.</p>\n\n## Markdown section\n\nMore body."]);
-        $this->get('/blog/' . $post->slug)->assertOk()->assertSee('Table of Contents')->assertSee('id="table-of-contents"', false);
+        $this->get('/blog/' . $post->slug)->assertOk()->assertSee('On this page')->assertSee('id="table-of-contents"', false)
+            ->assertSee('<h2 id="why-it-matters">', false)
+            ->assertSee('href="#markdown-section"', false);
     }
 
     public function test_contact_form_submission(): void
@@ -137,6 +160,29 @@ class PortfolioTest extends TestCase
             'subject' => 'Workflow Automation Inquiry',
             'status' => 'new',
         ]);
+    }
+
+    public function test_contact_form_stores_optional_company(): void
+    {
+        $this->postJson('/contact', [
+            'name' => 'Rina Kusuma',
+            'email' => 'rina@company.co.id',
+            'company' => 'PT Maju Bersama',
+            'message' => 'We are scaling support from 40 to 120 agents.',
+        ])->assertOk()->assertJson(['success' => true]);
+
+        $this->assertDatabaseHas('inquiries', ['email' => 'rina@company.co.id', 'company' => 'PT Maju Bersama']);
+    }
+
+    public function test_blog_article_links_a_related_case_study(): void
+    {
+        $post = Post::where('slug', 'architecting-resilient-document-ocr-pipelines-for-high-volume-operations')->firstOrFail();
+
+        $this->get('/blog/' . $post->slug)
+            ->assertOk()
+            ->assertSee('See it in production')
+            ->assertSee(Project::where('slug', 'ai-powered-document-ocr-enterprise-erp-pipeline')->value('title'))
+            ->assertSee('Keep reading');
     }
 
     public function test_unauthenticated_user_cannot_access_admin(): void

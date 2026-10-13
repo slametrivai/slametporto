@@ -14,6 +14,7 @@ class Career extends Model
         'role',
         'company',
         'description',
+        'highlight',
         'sort_order',
     ];
 

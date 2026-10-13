@@ -271,10 +271,19 @@
             note.className = 'admin-help';
             note.textContent = 'Memproses gambar...';
 
+            if (input.multiple) {
+                await shrinkMany(input, note);
+            } else {
+                await shrinkOne(input, note);
+            }
+            submits.forEach((b) => { b.disabled = false; });
+            input.dispatchEvent(new CustomEvent('upload-ready', { bubbles: true }));
+        });
+
+        async function shrinkOne(input, note) {
             const original = input.files[0];
             let file = original;
             try { file = await shrinkImage(original); } catch (err) { file = original; }
-            submits.forEach((b) => { b.disabled = false; });
 
             if (file.size > UPLOAD_MAX) {
                 input.value = '';
@@ -290,7 +299,33 @@
             } else {
                 note.textContent = `${formatSize(file.size)}, siap diunggah.`;
             }
-        });
+        }
+
+        async function shrinkMany(input, note) {
+            const maxFiles = Number(input.dataset.maxFiles) || Infinity;
+            const picked = [...input.files];
+            const kept = [];
+            const tooBig = [];
+
+            for (const original of picked.slice(0, maxFiles)) {
+                let file = original;
+                try { file = await shrinkImage(original); } catch (err) { file = original; }
+                (file.size > UPLOAD_MAX ? tooBig : kept).push(file);
+            }
+
+            const dt = new DataTransfer();
+            kept.forEach((file) => dt.items.add(file));
+            input.files = dt.files;
+
+            const problems = [];
+            if (picked.length > maxFiles) problems.push(`${picked.length - maxFiles} gambar dilewati (maks. ${maxFiles} per unggahan)`);
+            if (tooBig.length) problems.push(`${tooBig.map((f) => f.name).join(', ')} terlalu besar (maks. 2 MB)`);
+
+            const total = kept.reduce((sum, f) => sum + f.size, 0);
+            const ready = kept.length ? `${kept.length} gambar siap diunggah (${formatSize(total)}).` : 'Tidak ada gambar yang bisa diunggah.';
+            note.className = problems.length ? 'admin-error' : 'admin-help';
+            note.textContent = [ready, ...problems.map((p) => p + '.')].join(' ');
+        }
     </script>
     @stack('scripts')
 </body>

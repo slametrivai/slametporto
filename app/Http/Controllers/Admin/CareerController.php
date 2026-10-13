@@ -17,6 +17,7 @@ class CareerController extends Controller
         'role' => 'required|string|max:150',
         'company' => 'required|string|max:150',
         'description' => 'nullable|string',
+        'highlight' => 'nullable|string|max:60',
     ];
 
     public function index(): View

@@ -15,27 +15,40 @@ export default {
     theme: {
         extend: {
             colors: {
-                // Navy base. The yellow palette only passes WCAG on dark (8.1-18.5:1), 1.1-2.2:1 on white.
-                void: '#080B12',
+                // Values from slametrivai.pen (Redesign, Amber). The amber only passes WCAG on the dark surfaces.
+                void: {
+                    DEFAULT: '#0B0F17',
+                    deep: '#05070B', // lightbox and modal scrim
+                },
                 surface: {
-                    DEFAULT: '#111722',
-                    elevated: '#161E2C',
+                    DEFAULT: '#131A26',
+                    inset: '#0E131C', // inputs, image slots, alternating sections
+                    deep: '#0F1520', // featured case visual
+                    raised: '#1B2333', // chips and icon boxes
+                    logo: '#1A2230',
+                    elevated: '#161E2C', // resume page
                 },
-                edge: '#202938',
+                edge: '#1F2937',
                 content: {
-                    DEFAULT: '#F5F7FA',
-                    secondary: '#8B95A7', // 5.5-6.5:1 on the navy surfaces
+                    DEFAULT: '#F3F4F6',
+                    secondary: '#9CA3AF',
+                    body: '#C9CED6', // long-form paragraphs
+                    faint: '#6B7280', // counts, hints, copyright
+                    ghost: '#4B5563',
                 },
-                // Brand palette. Fill = primary CTA and focus only; soft = accent text; deep = borders/rules.
                 accent: {
-                    DEFAULT: '#FFFF66',
-                    hover: '#FFE566',
-                    soft: '#D6D58B',
-                    deep: '#B3B347',
+                    DEFAULT: '#F2B84B',
+                    hover: '#F5C76D',
+                    soft: '#F2B84B',
+                    deep: '#B8862F',
                 },
             },
             fontFamily: {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                mono: ['"JetBrains Mono"', ...defaultTheme.fontFamily.mono],
+            },
+            maxWidth: {
+                page: '90rem', // the 1440px design frame
             },
         },
     },

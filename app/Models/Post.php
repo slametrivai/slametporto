@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
@@ -63,6 +64,13 @@ class Post extends Model
         }
 
         return asset('storage/' . $this->cover_image);
+    }
+
+    /** False when the cover path points at a file that is not on the public disk. */
+    public function getHasCoverAttribute(): bool
+    {
+        return $this->cover_image
+            && (str_starts_with($this->cover_image, 'http') || Storage::disk('public')->exists($this->cover_image));
     }
 
     public function getDynamicSEOData(): SEOData

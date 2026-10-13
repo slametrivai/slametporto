@@ -31,6 +31,7 @@ class ContactController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:150',
             'email' => 'required|email|max:150',
+            'company' => 'nullable|string|max:150',
             'subject' => 'nullable|string|max:255',
             'message' => 'required|string|min:10|max:5000',
         ]);
@@ -38,6 +39,7 @@ class ContactController extends Controller
         $inquiry = Inquiry::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'company' => $validated['company'] ?? null,
             'subject' => $validated['subject'] ?? 'Website Inquiry',
             'message' => $validated['message'],
             'status' => 'new',

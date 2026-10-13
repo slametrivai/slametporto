@@ -1,46 +1,46 @@
-<article class="group flex flex-col justify-between rounded-2xl border border-edge bg-surface p-5 transition hover:border-accent-deep">
-    <div>
-        @if($project->cover_image)
-            <a href="{{ route('projects.show', $project->slug) }}" class="mb-4 block h-44 w-full overflow-hidden rounded-xl border border-edge bg-void" tabindex="-1" aria-hidden="true">
-                <img src="{{ $project->cover_image_url }}" alt="" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105">
-            </a>
-        @endif
-
-        <div class="mb-2.5 flex items-center justify-between gap-2">
-            <span class="inline-flex rounded-md bg-accent/10 px-2.5 py-0.5 text-xs font-semibold text-accent-soft">{{ $project->category }}</span>
+{{-- One row of the case study list: identity, story with pipeline flow, two metrics. --}}
+@php $steps = array_slice($project->steps, 0, 4); @endphp
+<li class="group relative flex flex-col gap-6 border-t border-edge py-9 lg:flex-row lg:gap-10">
+    <div class="lg:w-[22.5rem] lg:shrink-0">
+        <p class="flex flex-wrap items-center gap-2">
+            <span class="chip border border-edge px-2.5 py-1 text-xs text-content-secondary">{{ $project->category }}</span>
             @if($project->is_featured)
-                <span class="text-xs font-semibold text-accent">Featured</span>
+                <span class="chip gap-[0.3125rem] bg-accent/10 px-2.5 py-1 text-xs font-semibold text-accent">
+                    <x-lucide-star class="h-[0.6875rem] w-[0.6875rem]" />
+                    Featured
+                </span>
             @endif
-        </div>
-
-        <h3 class="line-clamp-2 text-base font-bold leading-snug text-content">
-            <a href="{{ route('projects.show', $project->slug) }}" class="transition hover:text-accent">{{ $project->title }}</a>
+        </p>
+        <h3 class="mt-3 text-[1.375rem] font-bold leading-7 tracking-[-0.018em] text-content">
+            <a href="{{ route('projects.show', $project->slug) }}" class="after:absolute after:inset-0">{{ $project->title }}</a>
         </h3>
-        <p class="mt-1 text-xs text-content-secondary">Role: <strong class="font-semibold text-content">{{ $project->role }}</strong></p>
-        <p class="mt-3 line-clamp-2 text-sm leading-relaxed text-content-secondary">{{ $project->challenge }}</p>
+        <p class="mt-3 text-sm text-content-secondary">{{ $project->role }}</p>
+    </div>
 
-        @if(!empty($project->impact_highlights))
-            <div class="mt-4 flex flex-wrap gap-1.5">
-                @foreach(array_slice($project->impact_highlights, 0, 2) as $h)
-                    <span class="inline-flex rounded-md border border-edge bg-surface-elevated px-2 py-0.5 text-xs font-semibold tabular-nums text-accent-soft">{{ $h['metric'] }}</span>
+    <div class="min-w-0 flex-1">
+        <p class="line-clamp-3 text-[0.9375rem] leading-6 text-content-secondary">{{ $project->teaser }}</p>
+        @if($steps)
+            <p class="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs font-medium">
+                @foreach($steps as $step)
+                    <span class="{{ $loop->index === 1 ? 'text-accent' : 'text-content-body' }}">{{ $step['name'] }}</span>
+                    @unless($loop->last)
+                        <x-lucide-arrow-right class="h-3 w-3 text-content-faint" />
+                    @endunless
                 @endforeach
-            </div>
-        @endif
-
-        @if(!empty($project->workflow_steps))
-            <p class="mt-4 flex items-center gap-1 overflow-hidden border-t border-edge pt-3 text-xs text-content-secondary">
-                <span class="truncate font-semibold text-content">{{ $project->workflow_steps[0] }}</span>
-                <span aria-hidden="true">→</span>
-                <span class="truncate font-semibold text-accent-soft">{{ $project->workflow_steps[1] ?? 'Engine' }}</span>
-                <span aria-hidden="true">→</span>
-                <span class="truncate font-semibold text-content">{{ $project->workflow_steps[count($project->workflow_steps) - 1] }}</span>
             </p>
         @endif
     </div>
 
-    <div class="mt-5 border-t border-edge pt-3.5">
-        <a href="{{ route('projects.show', $project->slug) }}" class="inline-flex min-h-11 items-center text-sm font-semibold text-accent-soft hover:text-accent hover:underline">
-            Read case study<span class="sr-only">: {{ $project->title }}</span>
-        </a>
-    </div>
-</article>
+    <dl class="flex gap-6 lg:w-[16.25rem] lg:shrink-0">
+        @foreach(array_slice($project->impact_highlights ?? [], 0, 2) as $h)
+            <div class="flex flex-1 flex-col-reverse justify-end gap-1">
+                <dt class="text-[0.8125rem] text-content-secondary">{{ $h['label'] }}</dt>
+                <dd class="text-[1.625rem] font-bold tracking-[-0.023em] text-accent">{{ $h['metric'] }}</dd>
+            </div>
+        @endforeach
+    </dl>
+
+    <span class="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full border border-edge text-content-secondary transition group-hover:border-accent group-hover:text-accent lg:inline-flex" aria-hidden="true">
+        <x-lucide-arrow-up-right class="h-[1.125rem] w-[1.125rem]" />
+    </span>
+</li>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
 
@@ -16,10 +17,14 @@ class Project extends Model
         'slug',
         'category',
         'role',
+        'summary',
         'challenge',
         'solution',
+        'result',
+        'volume',
         'impact_highlights',
         'workflow_steps',
+        'components',
         'cover_image',
         'is_featured',
         'sort_order',
@@ -30,9 +35,33 @@ class Project extends Model
         return [
             'impact_highlights' => 'array',
             'workflow_steps' => 'array',
+            'components' => 'array',
             'is_featured' => 'boolean',
             'sort_order' => 'integer',
         ];
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProjectImage::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    /**
+     * Workflow steps as [name, description] pairs. Older rows store plain strings.
+     *
+     * @return list<array{name: string, description: string}>
+     */
+    public function getStepsAttribute(): array
+    {
+        return array_map(fn ($step) => is_array($step)
+            ? ['name' => $step['name'] ?? '', 'description' => $step['description'] ?? '']
+            : ['name' => (string) $step, 'description' => ''], $this->workflow_steps ?? []);
+    }
+
+    /** Short pitch for cards and the page lead; falls back to the challenge. */
+    public function getTeaserAttribute(): string
+    {
+        return $this->summary ?: $this->challenge;
     }
 
     public function getCoverImageUrlAttribute(): ?string

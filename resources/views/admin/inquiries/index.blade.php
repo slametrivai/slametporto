@@ -57,6 +57,10 @@
                     <dt class="text-gray-500">Email</dt>
                     <dd class="mt-1"><a :href="'mailto:' + active.email" class="admin-link break-all" x-text="active.email"></a></dd>
                 </div>
+                <div x-show="active.company">
+                    <dt class="text-gray-500">Perusahaan</dt>
+                    <dd class="mt-1 font-medium text-gray-800" x-text="active.company"></dd>
+                </div>
             </dl>
 
             <div class="mt-6">

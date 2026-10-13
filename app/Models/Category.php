@@ -55,6 +55,17 @@ class Category extends Model
         return $query->where('type', $type);
     }
 
+    /** Lucide icon name for the topic, matched on keywords in the name. */
+    public function getIconAttribute(): string
+    {
+        return match (true) {
+            str_contains(strtolower($this->name), 'automation') => 'workflow',
+            (bool) preg_match('/crm|system|whatsapp/i', $this->name) => 'message-circle',
+            (bool) preg_match('/leader|operation|team/i', $this->name) => 'users',
+            default => 'file-text',
+        };
+    }
+
     public function getDynamicSEOData(): SEOData
     {
         $typeName = match ($this->type) {

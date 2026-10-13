@@ -1,95 +1,96 @@
 @extends('layouts.public')
 
-@section('title', 'Featured Systems & Case Studies | Slamet Rivai')
+@section('title', 'Case Studies | Slamet Rivai')
 @section('meta_description', 'Production systems case studies: OCR document pipelines, WhatsApp Cloud API engines, omnichannel CRM architectures, and workforce automation.')
 
 @php
-    $chip = 'inline-flex min-h-11 items-center rounded-lg px-3.5 text-sm font-semibold transition';
-    $chipOn = 'bg-accent text-void';
-    $chipOff = 'border border-edge bg-surface text-content-secondary hover:border-accent-deep hover:text-accent';
     $allActive = empty($selectedCategory) || $selectedCategory === 'All';
+    $tabs = [['label' => 'All', 'count' => $totals['case studies'], 'url' => route('projects.index', array_filter(['q' => $search, 'sort' => $sort === 'featured' ? null : $sort])), 'active' => $allActive]];
+    foreach ($categoriesWithCount as $catName => $count) {
+        $tabs[] = ['label' => $catName, 'count' => $count, 'url' => route('projects.index', array_filter(['category' => $catName, 'q' => $search, 'sort' => $sort === 'featured' ? null : $sort])), 'active' => $selectedCategory === $catName];
+    }
 @endphp
 
 @section('content')
-<div class="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 lg:px-8">
-    <div class="max-w-2xl">
-        <p class="flex items-center gap-3 text-sm font-semibold text-accent-soft"><span class="h-px w-8 bg-accent-deep" aria-hidden="true"></span> Operational Engineering</p>
-        <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-content sm:text-4xl">Featured Systems & Case Studies</h1>
-        <p class="mt-3 text-base text-content-secondary">Production operational blueprints: heuristic OCR parsing pipelines, WhatsApp Cloud API engines, omnichannel CRM dispatch, and workforce scheduling matrices.</p>
-    </div>
+    @include('partials.page-header', [
+        'current' => 'Case Studies',
+        'title' => 'Case studies',
+        'lead' => 'Production systems behind the numbers — OCR pipelines, WhatsApp Cloud API engines, omnichannel CRM dispatch and workforce scheduling. Each one starts with an operational bottleneck and ends with a measured result.',
+        'counts' => $totals,
+    ])
 
-    <div class="mt-8 flex flex-col items-stretch justify-between gap-4 border-b border-edge pb-6 md:flex-row md:items-center">
-        <nav class="flex flex-wrap items-center gap-2" aria-label="Filter by category">
-            <a href="{{ route('projects.index') }}" class="{{ $chip }} {{ $allActive ? $chipOn : $chipOff }}" @if($allActive) aria-current="page" @endif>All Systems</a>
-            @foreach($categoriesWithCount as $catName => $count)
-                <a href="{{ route('projects.index', ['category' => $catName]) }}" class="{{ $chip }} {{ $selectedCategory === $catName ? $chipOn : $chipOff }}" @if($selectedCategory === $catName) aria-current="page" @endif>
-                    {{ $catName }} <span class="ml-1 tabular-nums opacity-80">({{ $count }})</span>
-                </a>
-            @endforeach
-        </nav>
+    @include('partials.filter-bar', [
+        'label' => 'Filter by category',
+        'tabs' => $tabs,
+        'action' => route('projects.index'),
+        'hidden' => ['category' => $allActive ? null : $selectedCategory, 'sort' => $sort === 'featured' ? null : $sort],
+        'search' => $search,
+        'placeholder' => 'Search systems or tools…',
+    ])
 
-        <form action="{{ route('projects.index') }}" method="GET" role="search" class="relative w-full md:w-72">
-            @if($selectedCategory)
-                <input type="hidden" name="category" value="{{ $selectedCategory }}">
-            @endif
-            <label for="project-search" class="sr-only">Search case studies</label>
-            <input id="project-search" type="search" name="q" value="{{ $search }}" placeholder="Search case studies & tools..."
-                   class="h-11 w-full rounded-lg border border-edge bg-surface pl-10 pr-3 text-sm text-content placeholder:text-content-secondary focus:border-accent focus:ring-1 focus:ring-accent">
-            <svg class="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-content-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        </form>
-    </div>
-
-    @if(empty($selectedCategory) && empty($search) && $featuredProject)
-        <div class="mt-8 overflow-hidden rounded-2xl border border-edge bg-surface">
-            <div class="grid grid-cols-1 lg:grid-cols-12">
-                @if($featuredProject->cover_image)
-                    <div class="h-64 overflow-hidden bg-void sm:h-80 lg:col-span-7 lg:h-auto">
-                        <img src="{{ $featuredProject->cover_image_url }}" alt="{{ $featuredProject->title }}" class="h-full w-full object-cover">
+    @if($featuredProject)
+        <section class="page-container pt-12" aria-labelledby="featured-title">
+            <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-accent">
+                <x-lucide-star class="h-3.5 w-3.5" />
+                Featured
+            </p>
+            <article class="relative mt-5 flex flex-col overflow-hidden rounded-2xl border border-edge bg-surface transition hover:border-content-faint lg:min-h-[28.75rem] lg:flex-row">
+                <div class="flex flex-col justify-center gap-7 p-6 sm:p-12 lg:w-[38.75rem] lg:shrink-0">
+                    <div>
+                        <p class="text-[0.8125rem] font-medium text-content-secondary">{{ $featuredProject->category }} · {{ $featuredProject->role }}</p>
+                        <h2 id="featured-title" class="mt-4 text-[1.625rem] font-bold leading-9 tracking-[-0.02em] text-content sm:text-[1.875rem]">
+                            <a href="{{ route('projects.show', $featuredProject->slug) }}" class="after:absolute after:inset-0">{{ $featuredProject->title }}</a>
+                        </h2>
+                        <p class="mt-4 text-base leading-[1.625rem] text-content-secondary">{{ $featuredProject->teaser }}</p>
+                    </div>
+                    @if(!empty($featuredProject->impact_highlights))
+                        <dl class="flex flex-wrap gap-x-8 gap-y-5">
+                            @foreach(array_slice($featuredProject->impact_highlights, 0, 3) as $h)
+                                <div class="flex flex-col-reverse gap-1.5">
+                                    <dt class="text-[0.8125rem] text-content-secondary">{{ $h['label'] }}</dt>
+                                    <dd class="text-[1.625rem] font-bold tracking-[-0.02em] text-accent">{{ $h['metric'] }}</dd>
+                                </div>
+                            @endforeach
+                        </dl>
+                    @endif
+                    <span class="inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-content" aria-hidden="true">
+                        Read full case study
+                        <x-lucide-arrow-right class="h-4 w-4" />
+                    </span>
+                </div>
+                @if(!empty($featuredProject->steps))
+                    <div class="flex flex-1 items-center justify-center border-t border-edge bg-surface-deep p-6 sm:p-12 lg:border-l lg:border-t-0">
+                        @include('projects._pipeline', ['project' => $featuredProject])
                     </div>
                 @endif
-                <div class="{{ $featuredProject->cover_image ? 'lg:col-span-5' : 'lg:col-span-12' }} flex flex-col justify-between p-6 sm:p-10">
-                    <div>
-                        <p class="mb-3 flex flex-wrap items-center gap-2 text-sm">
-                            <span class="inline-flex rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold text-void">Featured Architecture</span>
-                            <span class="text-content-secondary">{{ $featuredProject->category }}</span>
-                        </p>
-                        <h2 class="text-xl font-bold leading-snug text-content sm:text-2xl">
-                            <a href="{{ route('projects.show', $featuredProject->slug) }}" class="transition hover:text-accent">{{ $featuredProject->title }}</a>
-                        </h2>
-                        <p class="mt-1 text-sm text-content-secondary">Role: <strong class="font-semibold text-content">{{ $featuredProject->role }}</strong></p>
-                        <p class="mt-3 line-clamp-3 text-sm leading-relaxed text-content-secondary">{{ $featuredProject->challenge }}</p>
-
-                        @if(!empty($featuredProject->impact_highlights))
-                            <div class="mt-4 flex flex-wrap gap-2">
-                                @foreach(array_slice($featuredProject->impact_highlights, 0, 2) as $h)
-                                    <span class="inline-flex rounded-lg border border-edge bg-surface-elevated px-2.5 py-1 text-sm font-semibold tabular-nums text-accent-soft">{{ $h['metric'] }}</span>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="mt-6 border-t border-edge pt-4">
-                        <a href="{{ route('projects.show', $featuredProject->slug) }}" class="inline-flex min-h-11 items-center text-sm font-semibold text-accent-soft hover:text-accent hover:underline">Read full case study</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+            </article>
+        </section>
     @endif
 
-    <div class="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        @forelse($projects as $project)
-            @include('projects._card', ['project' => $project])
-        @empty
-            <div class="col-span-full py-16 text-center">
-                <p class="text-base font-semibold text-content">No case studies match your search</p>
-                <p class="mt-1 text-sm text-content-secondary">Try a different keyword or pick another category.</p>
-                <a href="{{ route('projects.index') }}" class="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-accent-soft hover:text-accent hover:underline">Clear filters</a>
-            </div>
-        @endforelse
-    </div>
+    <section class="page-container pb-20 pt-16 sm:pb-[7.5rem] sm:pt-[4.5rem]" aria-labelledby="list-title">
+        <div class="flex items-center justify-between gap-4 pb-4">
+            <h2 id="list-title" class="text-[1.375rem] font-bold tracking-[-0.018em] text-content">
+                {{ $featuredProject ? 'All case studies' : ($search ? 'Results for “' . $search . '”' : $selectedCategory) }}
+            </h2>
+            @include('partials.sort-menu', ['options' => \App\Http\Controllers\ProjectPublicController::SORTS, 'current' => $sort, 'prefix' => 'Sort: '])
+        </div>
 
-    <div class="mt-12">
-        {{ $projects->links() }}
-    </div>
-</div>
+        <ul>
+            @forelse($projects as $project)
+                @include('projects._card', ['project' => $project])
+            @empty
+                <li class="border-t border-edge py-16 text-center">
+                    <p class="text-base font-semibold text-content">No case studies match your search</p>
+                    <p class="mt-1 text-sm text-content-secondary">Try a different keyword or pick another category.</p>
+                    <a href="{{ route('projects.index') }}" class="link-accent mt-2">Clear filters</a>
+                </li>
+            @endforelse
+        </ul>
+
+        @if($projects->hasPages())
+            <div class="mt-10">{{ $projects->links() }}</div>
+        @endif
+    </section>
+
+    @include('partials.cta', ['title' => 'Facing a similar operational bottleneck?'])
 @endsection

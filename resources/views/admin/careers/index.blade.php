@@ -22,7 +22,7 @@
     @else
         <ol id="career-list" class="border-t border-gray-100">
             @foreach($careers as $career)
-                <li data-id="{{ $career->id }}" data-career="{{ json_encode($career->only(['id', 'company', 'role', 'period', 'description'])) }}"
+                <li data-id="{{ $career->id }}" data-career="{{ json_encode($career->only(['id', 'company', 'role', 'period', 'description', 'highlight'])) }}"
                     class="group flex flex-wrap items-start gap-3 border-t border-gray-100 bg-white px-5 py-4 first:border-t-0 sm:flex-nowrap sm:px-6">
                     <span class="career-handle flex h-11 w-8 shrink-0 cursor-grab touch-none items-center justify-center text-gray-500 active:cursor-grabbing" title="Seret untuk mengurutkan" aria-hidden="true">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M7 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm0 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm-1.5 7.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 4a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm-1.5 7.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM16 16a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
@@ -93,6 +93,12 @@
                 <textarea id="career-description" name="description" rows="5" class="admin-textarea" placeholder="Peran operasional, sistem yang dibangun, atau tim yang dipimpin."></textarea>
                 @error('description')<p class="admin-error">{{ $message }}</p>@enderror
             </div>
+            <div>
+                <label for="career-highlight" class="admin-label">Pencapaian utama</label>
+                <input id="career-highlight" type="text" name="highlight" maxlength="60" class="admin-input" placeholder="Contoh: 99.8% SLA" aria-describedby="career-highlight-help">
+                <p id="career-highlight-help" class="admin-help">Opsional. Tampil sebagai label kecil di samping peran pada timeline karier.</p>
+                @error('highlight')<p class="admin-error">{{ $message }}</p>@enderror
+            </div>
         </div>
 
         <div class="mt-8 flex flex-wrap justify-end gap-3">
@@ -115,7 +121,7 @@ function openCareerModal(career = {}, keepErrors = false) {
     careerForm.action = editing ? updateUrl.replace('__ID__', career.id) : storeUrl;
     careerForm.elements['_method'].value = editing ? 'PUT' : 'POST';
     careerForm.elements['_career_id'].value = career.id ?? '';
-    ['company', 'role', 'period', 'description'].forEach((f) => { careerForm.elements[f].value = career[f] ?? ''; });
+    ['company', 'role', 'period', 'description', 'highlight'].forEach((f) => { careerForm.elements[f].value = career[f] ?? ''; });
     if (!keepErrors) careerDialog.querySelectorAll('.admin-error').forEach((el) => el.remove());
     document.getElementById('career-dialog-title').textContent = editing ? 'Edit riwayat karier' : 'Tambah riwayat karier';
     document.getElementById('career-submit').textContent = editing ? 'Simpan perubahan' : 'Simpan riwayat';
@@ -132,6 +138,7 @@ careerDialog.addEventListener('click', (e) => { if (e.target === careerDialog) c
         'role' => old('role'),
         'period' => old('period'),
         'description' => old('description'),
+        'highlight' => old('highlight'),
     ]), true);
 @endif
 

@@ -39,6 +39,13 @@
             </div>
 
             <div>
+                <label for="summary" class="admin-label">Ringkasan</label>
+                <textarea id="summary" name="summary" rows="2" maxlength="500" class="admin-textarea" aria-describedby="summary-help"
+                          placeholder="Satu atau dua kalimat: kondisi awal dan apa yang sekarang berjalan.">{{ old('summary', $project?->summary) }}</textarea>
+                <p id="summary-help" class="admin-help">Tampil di bawah judul halaman studi kasus dan di kartu proyek. Jika kosong, kolom Masalah yang dipakai.</p>
+            </div>
+
+            <div>
                 <label for="challenge" class="admin-label">Masalah <span class="text-error-600">*</span></label>
                 <textarea id="challenge" name="challenge" rows="4" required class="admin-textarea"
                           placeholder="Kendala operasional, bottleneck, atau tingkat kesalahan sebelum proyek.">{{ old('challenge', $project?->challenge) }}</textarea>
@@ -49,6 +56,26 @@
                 <textarea id="solution" name="solution" rows="4" required class="admin-textarea"
                           placeholder="Integrasi sistem, modul yang dibangun, dan alur otomasi data.">{{ old('solution', $project?->solution) }}</textarea>
             </div>
+
+            <div>
+                <label for="result" class="admin-label">Hasil</label>
+                <textarea id="result" name="result" rows="3" class="admin-textarea"
+                          placeholder="Dampak yang terukur setelah sistem berjalan.">{{ old('result', $project?->result) }}</textarea>
+            </div>
+
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div>
+                    <label for="volume" class="admin-label">Volume</label>
+                    <input id="volume" type="text" name="volume" value="{{ old('volume', $project?->volume) }}" maxlength="150" class="admin-input"
+                           placeholder="Contoh: 5,000+ dokumen / bulan">
+                </div>
+                <div>
+                    <label for="components" class="admin-label">Komponen utama</label>
+                    <input id="components" type="text" name="components" value="{{ old('components', implode(', ', $project?->components ?? [])) }}" maxlength="500" class="admin-input"
+                           placeholder="Contoh: Computer-vision OCR, REST webhooks" aria-describedby="components-help">
+                    <p id="components-help" class="admin-help">Pisahkan dengan koma.</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -58,12 +85,12 @@
                 <h3 class="admin-card-title">Metrik dampak</h3>
                 <p class="admin-card-desc">Isi hanya angka yang benar-benar terukur. Contoh format: "2 hari → 30 menit".</p>
             </div>
-            <button type="button" @click="impactList.push({ metric: '', label: '' })" class="admin-btn-outline">Tambah metrik</button>
+            <button type="button" @click="impactList.push({ metric: '', label: '', detail: '' })" class="admin-btn-outline">Tambah metrik</button>
         </div>
         <div class="admin-card-body">
             <template x-for="(item, index) in impactList" :key="index">
                 <div class="flex items-start gap-3">
-                    <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-3">
                         <div>
                             <label :for="'metric-' + index" class="sr-only" x-text="'Nilai metrik ' + (index + 1)"></label>
                             <input :id="'metric-' + index" type="text" name="impact_metrics[]" x-model="item.metric" required class="admin-input" placeholder="Nilai, contoh: 2 hari → 30 menit">
@@ -71,6 +98,10 @@
                         <div>
                             <label :for="'label-' + index" class="sr-only" x-text="'Label metrik ' + (index + 1)"></label>
                             <input :id="'label-' + index" type="text" name="impact_labels[]" x-model="item.label" required class="admin-input" placeholder="Label, contoh: Waktu proses dokumen">
+                        </div>
+                        <div>
+                            <label :for="'detail-' + index" class="sr-only" x-text="'Keterangan metrik ' + (index + 1)"></label>
+                            <input :id="'detail-' + index" type="text" name="impact_details[]" x-model="item.detail" class="admin-input" placeholder="Keterangan (opsional), contoh: dari 48 jam">
                         </div>
                     </div>
                     <button type="button" @click="impactList.length > 1 && impactList.splice(index, 1)" :disabled="impactList.length === 1"
@@ -88,13 +119,16 @@
                 <h3 class="admin-card-title">Alur pipeline</h3>
                 <p class="admin-card-desc">Langkah alur data dari kiri ke kanan, contoh: Dokumen pelanggan, OCR, Data terstruktur, Sistem operasional.</p>
             </div>
-            <button type="button" @click="stepsList.push({ name: '' })" class="admin-btn-outline">Tambah langkah</button>
+            <button type="button" @click="stepsList.push({ name: '', description: '' })" class="admin-btn-outline">Tambah langkah</button>
         </div>
         <div class="admin-card-body">
             <template x-for="(step, index) in stepsList" :key="index">
-                <div class="flex items-center gap-3">
-                    <label :for="'step-' + index" class="w-16 shrink-0 text-sm font-medium text-gray-700" x-text="'Langkah ' + (index + 1)"></label>
-                    <input :id="'step-' + index" type="text" name="workflow_steps[]" x-model="step.name" required class="admin-input" placeholder="Nama langkah">
+                <div class="flex items-start gap-3">
+                    <label :for="'step-' + index" class="flex min-h-11 w-16 shrink-0 items-center text-sm font-medium text-gray-700" x-text="'Langkah ' + (index + 1)"></label>
+                    <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-[1fr_2fr]">
+                        <input :id="'step-' + index" type="text" name="workflow_steps[]" x-model="step.name" required class="admin-input" placeholder="Nama langkah">
+                        <input type="text" name="step_descriptions[]" x-model="step.description" class="admin-input" placeholder="Penjelasan singkat (opsional)" :aria-label="'Penjelasan langkah ' + (index + 1)">
+                    </div>
                     <button type="button" @click="stepsList.length > 1 && stepsList.splice(index, 1)" :disabled="stepsList.length === 1"
                             class="admin-icon-btn admin-icon-btn-danger disabled:cursor-not-allowed disabled:opacity-50" :aria-label="'Hapus langkah ' + (index + 1)">
                         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -116,6 +150,48 @@
                 @endif
                 <input id="cover_image" type="file" name="cover_image" accept="image/*,.svg" data-shrink class="admin-file" aria-describedby="cover-help">
                 <p id="cover-help" class="admin-help">Opsional. Maks. 2 MB; foto yang lebih besar otomatis diperkecil sebelum diunggah.{{ $project ? ' Kosongkan jika tidak mengganti cover.' : '' }}</p>
+            </div>
+
+            <div data-upload-field x-data="{ previews: [] }"
+                 @upload-ready="previews.forEach(URL.revokeObjectURL); previews = [...$event.target.files].map(f => URL.createObjectURL(f))">
+                <label for="gallery_images" class="admin-label">Galeri gambar</label>
+
+                @if($project?->images->isNotEmpty())
+                    <fieldset class="mb-4">
+                        <legend class="mb-2 text-theme-xs text-gray-500">{{ $project->images->count() }} gambar tersimpan. Judul dan keterangan tampil di galeri dan lightbox. Centang "Hapus" untuk membuang gambar saat disimpan.</legend>
+                        <ul class="space-y-3">
+                            @foreach($project->images as $image)
+                                <li class="group flex flex-col gap-3 rounded-lg border border-gray-200 p-3 has-[:checked]:border-error-500 sm:flex-row">
+                                    <img src="{{ $image->url }}" alt="Gambar galeri {{ $loop->iteration }}" loading="lazy"
+                                         class="aspect-[4/3] w-full shrink-0 rounded-md object-cover transition-opacity group-has-[:checked]:opacity-40 sm:w-40">
+                                    <div class="flex-1 space-y-2">
+                                        <label for="image-title-{{ $image->id }}" class="sr-only">Judul gambar {{ $loop->iteration }}</label>
+                                        <input id="image-title-{{ $image->id }}" type="text" name="image_titles[{{ $image->id }}]" maxlength="150" class="admin-input"
+                                               value="{{ old('image_titles.' . $image->id, $image->title) }}" placeholder="Judul, contoh: OCR review queue">
+                                        <label for="image-desc-{{ $image->id }}" class="sr-only">Keterangan gambar {{ $loop->iteration }}</label>
+                                        <textarea id="image-desc-{{ $image->id }}" name="image_descriptions[{{ $image->id }}]" rows="2" maxlength="500" class="admin-textarea"
+                                                  placeholder="Keterangan singkat (opsional)">{{ old('image_descriptions.' . $image->id, $image->description) }}</textarea>
+                                        <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm text-gray-700">
+                                            <input type="checkbox" name="remove_images[]" value="{{ $image->id }}" class="admin-checkbox"
+                                                   @checked(in_array($image->id, old('remove_images', [])))>
+                                            Hapus<span class="sr-only"> gambar galeri {{ $loop->iteration }}</span>
+                                        </label>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </fieldset>
+                @endif
+
+                <input id="gallery_images" type="file" name="gallery_images[]" accept="image/jpeg,image/png,image/webp" multiple
+                       data-shrink data-max-files="12" class="admin-file" aria-describedby="gallery-help">
+                <p id="gallery-help" class="admin-help">Opsional. Pilih hingga 12 gambar sekaligus (JPG, PNG, atau WebP, maks. 2 MB per gambar). Gambar baru ditambahkan setelah gambar yang sudah ada; judul dan keterangannya bisa diisi setelah disimpan.</p>
+
+                <ul x-show="previews.length" x-cloak class="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6" aria-label="Pratinjau gambar yang akan diunggah">
+                    <template x-for="(src, i) in previews" :key="src">
+                        <li><img :src="src" :alt="'Pratinjau gambar ' + (i + 1)" class="aspect-square w-full rounded-lg border border-gray-200 object-cover"></li>
+                    </template>
+                </ul>
             </div>
 
             <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -141,11 +217,11 @@
 <script>
 function projectForm() {
     const highlights = @js($project?->impact_highlights ?? []);
-    const steps = @js($project?->workflow_steps ?? []);
+    const steps = @js($project?->steps ?? []);
 
     return {
-        impactList: highlights.length ? highlights : [{ metric: '', label: '' }],
-        stepsList: steps.length ? steps.map(name => ({ name })) : [{ name: '' }],
+        impactList: highlights.length ? highlights.map(h => ({ detail: '', ...h })) : [{ metric: '', label: '', detail: '' }],
+        stepsList: steps.length ? steps : [{ name: '', description: '' }],
     };
 }
 </script>

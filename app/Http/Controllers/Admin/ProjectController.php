@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Project;
+use App\Models\ProjectImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,9 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ProjectController extends Controller
 {
+    // PHP's max_file_uploads defaults to 20, and the cover image counts toward it.
+    private const GALLERY_MAX_PER_UPLOAD = 12;
+
     public function index(Request $request): View|JsonResponse
     {
         if ($request->ajax()) {
@@ -67,47 +71,7 @@ class ProjectController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'required|string|max:100',
-            'role' => 'required|string|max:150',
-            'challenge' => 'required|string',
-            'solution' => 'required|string',
-            'impact_metrics' => 'nullable|array',
-            'impact_labels' => 'nullable|array',
-            'workflow_steps' => 'nullable|array',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
-            'is_featured' => 'sometimes|boolean',
-            'sort_order' => 'nullable|integer',
-        ]);
-
-        $coverImagePath = null;
-        if ($request->hasFile('cover_image')) {
-            $coverImagePath = $request->file('cover_image')->store('projects', 'public');
-        }
-
-        // Process impact highlights array of objects
-        $impactHighlights = [];
-        if (!empty($validated['impact_metrics']) && is_array($validated['impact_metrics'])) {
-            foreach ($validated['impact_metrics'] as $index => $metric) {
-                if (!empty(trim($metric))) {
-                    $impactHighlights[] = [
-                        'metric' => trim($metric),
-                        'label' => trim($validated['impact_labels'][$index] ?? ''),
-                    ];
-                }
-            }
-        }
-
-        // Process workflow steps
-        $workflowSteps = [];
-        if (!empty($validated['workflow_steps']) && is_array($validated['workflow_steps'])) {
-            foreach ($validated['workflow_steps'] as $step) {
-                if (!empty(trim($step))) {
-                    $workflowSteps[] = trim($step);
-                }
-            }
-        }
+        $validated = $request->validate($this->rules());
 
         $slug = Str::slug($validated['title']);
         $originalSlug = $slug;
@@ -116,19 +80,12 @@ class ProjectController extends Controller
             $slug = $originalSlug . '-' . $counter++;
         }
 
-        Project::create([
-            'title' => $validated['title'],
+        $project = Project::create($this->contentFields($request, $validated) + [
             'slug' => $slug,
-            'category' => $validated['category'],
-            'role' => $validated['role'],
-            'challenge' => $validated['challenge'],
-            'solution' => $validated['solution'],
-            'impact_highlights' => $impactHighlights,
-            'workflow_steps' => $workflowSteps,
-            'cover_image' => $coverImagePath,
-            'is_featured' => $request->boolean('is_featured', false),
-            'sort_order' => $validated['sort_order'] ?? 0,
+            'cover_image' => $request->file('cover_image')?->store('projects', 'public'),
         ]);
+
+        $this->storeGalleryImages($request, $project);
 
         return redirect()->route('admin.projects.index')->with('success', 'Studi kasus proyek berhasil ditambahkan!');
     }
@@ -147,54 +104,16 @@ class ProjectController extends Controller
 
     public function update(Request $request, Project $project): RedirectResponse
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'required|string|max:100',
-            'role' => 'required|string|max:150',
-            'challenge' => 'required|string',
-            'solution' => 'required|string',
-            'impact_metrics' => 'nullable|array',
-            'impact_labels' => 'nullable|array',
-            'workflow_steps' => 'nullable|array',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
-            'is_featured' => 'sometimes|boolean',
-            'sort_order' => 'nullable|integer',
+        $validated = $request->validate($this->rules() + [
+            'remove_images' => 'nullable|array',
+            'remove_images.*' => 'integer',
+            'image_titles' => 'nullable|array',
+            'image_titles.*' => 'nullable|string|max:150',
+            'image_descriptions' => 'nullable|array',
+            'image_descriptions.*' => 'nullable|string|max:500',
         ]);
 
-        // Process impact highlights
-        $impactHighlights = [];
-        if (!empty($validated['impact_metrics']) && is_array($validated['impact_metrics'])) {
-            foreach ($validated['impact_metrics'] as $index => $metric) {
-                if (!empty(trim($metric))) {
-                    $impactHighlights[] = [
-                        'metric' => trim($metric),
-                        'label' => trim($validated['impact_labels'][$index] ?? ''),
-                    ];
-                }
-            }
-        }
-
-        // Process workflow steps
-        $workflowSteps = [];
-        if (!empty($validated['workflow_steps']) && is_array($validated['workflow_steps'])) {
-            foreach ($validated['workflow_steps'] as $step) {
-                if (!empty(trim($step))) {
-                    $workflowSteps[] = trim($step);
-                }
-            }
-        }
-
-        $data = [
-            'title' => $validated['title'],
-            'category' => $validated['category'],
-            'role' => $validated['role'],
-            'challenge' => $validated['challenge'],
-            'solution' => $validated['solution'],
-            'impact_highlights' => $impactHighlights,
-            'workflow_steps' => $workflowSteps,
-            'is_featured' => $request->boolean('is_featured', false),
-            'sort_order' => $validated['sort_order'] ?? 0,
-        ];
+        $data = $this->contentFields($request, $validated);
 
         if ($request->hasFile('cover_image')) {
             if ($project->cover_image && !str_starts_with($project->cover_image, 'http')) {
@@ -205,6 +124,20 @@ class ProjectController extends Controller
 
         $project->update($data);
 
+        foreach ($project->images as $image) {
+            if (in_array($image->id, $validated['remove_images'] ?? [])) {
+                $this->deleteGalleryImage($image);
+                continue;
+            }
+
+            $image->update([
+                'title' => trim($validated['image_titles'][$image->id] ?? '') ?: null,
+                'description' => trim($validated['image_descriptions'][$image->id] ?? '') ?: null,
+            ]);
+        }
+
+        $this->storeGalleryImages($request, $project);
+
         return redirect()->route('admin.projects.index')->with('success', 'Studi kasus proyek berhasil diperbarui!');
     }
 
@@ -214,6 +147,8 @@ class ProjectController extends Controller
             Storage::disk('public')->delete($project->cover_image);
         }
 
+        $project->images->each(fn (ProjectImage $image) => $this->deleteGalleryImage($image));
+
         $project->delete();
 
         if (request()->ajax()) {
@@ -221,5 +156,94 @@ class ProjectController extends Controller
         }
 
         return redirect()->route('admin.projects.index')->with('success', 'Proyek berhasil dihapus!');
+    }
+
+    private function rules(): array
+    {
+        return [
+            'title' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'role' => 'required|string|max:150',
+            'summary' => 'nullable|string|max:500',
+            'challenge' => 'required|string',
+            'solution' => 'required|string',
+            'result' => 'nullable|string',
+            'volume' => 'nullable|string|max:150',
+            'components' => 'nullable|string|max:500',
+            'impact_metrics' => 'nullable|array',
+            'impact_labels' => 'nullable|array',
+            'impact_details' => 'nullable|array',
+            'workflow_steps' => 'nullable|array',
+            'step_descriptions' => 'nullable|array',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
+            'gallery_images' => 'nullable|array|max:' . self::GALLERY_MAX_PER_UPLOAD,
+            'gallery_images.*' => 'image|mimes:jpeg,png,jpg,webp|max:2048',
+            'is_featured' => 'sometimes|boolean',
+            'sort_order' => 'nullable|integer',
+        ];
+    }
+
+    /** Text, metrics and pipeline fields shared by store and update. */
+    private function contentFields(Request $request, array $validated): array
+    {
+        $impactHighlights = [];
+        foreach ($validated['impact_metrics'] ?? [] as $index => $metric) {
+            if (trim((string) $metric) !== '') {
+                $impactHighlights[] = [
+                    'metric' => trim($metric),
+                    'label' => trim($validated['impact_labels'][$index] ?? ''),
+                    'detail' => trim($validated['impact_details'][$index] ?? ''),
+                ];
+            }
+        }
+
+        $workflowSteps = [];
+        foreach ($validated['workflow_steps'] ?? [] as $index => $step) {
+            if (trim((string) $step) !== '') {
+                $workflowSteps[] = [
+                    'name' => trim($step),
+                    'description' => trim($validated['step_descriptions'][$index] ?? ''),
+                ];
+            }
+        }
+
+        $components = array_values(array_filter(array_map('trim', explode(',', $validated['components'] ?? ''))));
+
+        return [
+            'title' => $validated['title'],
+            'category' => $validated['category'],
+            'role' => $validated['role'],
+            'summary' => $validated['summary'] ?? null,
+            'challenge' => $validated['challenge'],
+            'solution' => $validated['solution'],
+            'result' => $validated['result'] ?? null,
+            'volume' => $validated['volume'] ?? null,
+            'components' => $components ?: null,
+            'impact_highlights' => $impactHighlights,
+            'workflow_steps' => $workflowSteps,
+            'is_featured' => $request->boolean('is_featured', false),
+            'sort_order' => $validated['sort_order'] ?? 0,
+        ];
+    }
+
+    private function storeGalleryImages(Request $request, Project $project): void
+    {
+        $sortOrder = (int) $project->images()->max('sort_order');
+
+        foreach ($request->file('gallery_images', []) as $file) {
+            $project->images()->create([
+                'path' => $file->store('projects/gallery', 'public'),
+                'sort_order' => ++$sortOrder,
+            ]);
+        }
+    }
+
+    private function deleteGalleryImage(ProjectImage $image): void
+    {
+        if (!str_starts_with($image->path, 'http')) {
+            Storage::disk('public')->delete($image->path);
+        }
+
+        $image->delete();
     }
 }

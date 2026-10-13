@@ -73,6 +73,7 @@ class InquiryController extends Controller
                 'id' => $inquiry->id,
                 'name' => $inquiry->name,
                 'email' => $inquiry->email,
+                'company' => $inquiry->company,
                 'subject' => $inquiry->subject,
                 'message' => nl2br(e($inquiry->message)),
                 'status' => $inquiry->status,
@@ -114,7 +115,7 @@ class InquiryController extends Controller
 
         return response()->stream(function () use ($inquiries) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['ID', 'Nama', 'Email', 'Subjek', 'Pesan', 'Status', 'Tanggal Masuk']);
+            fputcsv($file, ['ID', 'Nama', 'Email', 'Perusahaan', 'Subjek', 'Pesan', 'Status', 'Tanggal Masuk']);
 
             // Public form input: prefix cells a spreadsheet would evaluate as a formula.
             $safe = fn ($value) => is_string($value) && preg_match('/^[=+\-@\t\r]/', $value) ? "'".$value : $value;
@@ -124,6 +125,7 @@ class InquiryController extends Controller
                     $row->id,
                     $row->name,
                     $row->email,
+                    $row->company,
                     $row->subject,
                     $row->message,
                     $row->status,

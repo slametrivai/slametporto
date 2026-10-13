@@ -1,26 +1,20 @@
-<article class="flex flex-col justify-between overflow-hidden rounded-2xl border border-edge bg-surface transition hover:border-accent-deep">
-    @if($post->cover_image)
-        <a href="{{ route('blog.show', $post->slug) }}" class="block h-44 w-full overflow-hidden bg-void" tabindex="-1" aria-hidden="true">
-            <img src="{{ $post->cover_image_url }}" alt="" class="h-full w-full object-cover transition duration-300 hover:scale-105">
-        </a>
-    @endif
-    <div class="flex flex-1 flex-col justify-between p-6">
-        <div>
-            <p class="mb-2 flex items-center gap-2 text-xs text-content-secondary">
-                <span class="font-semibold text-accent-soft">{{ $post->category?->name }}</span>
-                <span aria-hidden="true">•</span>
-                <span>{{ $post->reading_time }} min read</span>
-            </p>
-            <h3 class="line-clamp-2 text-base font-bold leading-snug text-content">
-                <a href="{{ route('blog.show', $post->slug) }}" class="transition hover:text-accent">{{ $post->title }}</a>
-            </h3>
-            <p class="mt-2 line-clamp-3 text-sm leading-relaxed text-content-secondary">{{ $post->excerpt }}</p>
-        </div>
-        <div class="mt-6 flex items-center justify-between border-t border-edge pt-4 text-sm">
-            <span class="tabular-nums text-content-secondary">{{ $post->published_at?->format('d M Y') }}</span>
-            <a href="{{ route('blog.show', $post->slug) }}" class="inline-flex min-h-11 items-center font-semibold text-accent-soft hover:text-accent hover:underline">
-                Read article<span class="sr-only">: {{ $post->title }}</span>
-            </a>
-        </div>
+{{-- One row of the article list: date column, topic meta, title, excerpt. --}}
+<li class="group relative flex flex-col gap-4 border-t border-edge py-9 sm:flex-row sm:gap-12">
+    <p class="flex items-baseline gap-2 sm:w-[7.5rem] sm:shrink-0 sm:flex-col sm:gap-0.5">
+        <time datetime="{{ $post->published_at?->toDateString() }}" class="text-xl font-bold tracking-[-0.015em] text-content">{{ $post->published_at?->format('d M') }}</time>
+        <span class="text-[0.8125rem] text-content-faint">{{ $post->published_at?->format('Y') }}</span>
+    </p>
+    <div class="min-w-0 flex-1">
+        <p class="flex items-center gap-2 text-[0.8125rem] font-medium text-content-secondary">
+            <x-dynamic-component :component="'lucide-' . ($post->category?->icon ?? 'file-text')" class="h-3.5 w-3.5 text-accent" />
+            {{ $post->category?->name }} · {{ $post->reading_time }} min read
+        </p>
+        <h3 class="mt-3 max-w-[51.25rem] text-[1.375rem] font-bold leading-[1.27] tracking-[-0.02em] text-content sm:text-[1.625rem]">
+            <a href="{{ route('blog.show', $post->slug) }}" class="after:absolute after:inset-0">{{ $post->title }}</a>
+        </h3>
+        <p class="mt-3 line-clamp-2 max-w-[51.25rem] text-base leading-[1.625rem] text-content-secondary">{{ $post->excerpt }}</p>
     </div>
-</article>
+    <span class="hidden h-12 w-12 shrink-0 items-center justify-center rounded-full border border-edge text-content-secondary transition group-hover:border-accent group-hover:text-accent sm:inline-flex" aria-hidden="true">
+        <x-lucide-arrow-up-right class="h-[1.125rem] w-[1.125rem]" />
+    </span>
+</li>
