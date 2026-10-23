@@ -68,36 +68,6 @@
         </section>
     @endif
 
-    @if($steps)
-        <section class="page-container pt-20 sm:pt-24" aria-labelledby="pipeline-title">
-            <p class="eyebrow">Architecture & workflow</p>
-            <h2 id="pipeline-title" class="mt-3 text-[1.75rem] font-bold tracking-[-0.025em] text-content sm:text-[2rem]">How work moves through the pipeline</h2>
-
-            <ol class="mt-8 flex flex-col items-stretch gap-3 rounded-[1.25rem] border border-edge bg-surface p-4 sm:p-8 lg:flex-row lg:items-center">
-                @foreach($steps as $i => $step)
-                    @php $last = $loop->last; @endphp
-                    <li class="flex flex-1 flex-col gap-3.5 rounded-[0.875rem] border p-6 {{ $last ? 'border-accent/30 bg-accent/10' : 'border-edge bg-surface-inset' }}">
-                        <div class="flex items-center justify-between">
-                            <span class="flex h-10 w-10 items-center justify-center rounded-[0.625rem] {{ $last ? 'bg-accent/15 text-accent' : 'bg-surface-raised text-content-secondary' }}">
-                                <x-dynamic-component :component="'lucide-' . $stepIcons[$i % count($stepIcons)]" class="h-5 w-5" />
-                            </span>
-                            <span class="text-[0.8125rem] font-semibold tabular-nums text-content-faint">{{ sprintf('%02d', $i + 1) }}</span>
-                        </div>
-                        <h3 class="text-[1.0625rem] font-semibold text-content">{{ $step['name'] }}</h3>
-                        @if($step['description'])
-                            <p class="text-sm leading-[1.375rem] text-content-secondary">{{ $step['description'] }}</p>
-                        @endif
-                    </li>
-                    @unless($last)
-                        <li class="flex justify-center text-content-faint" aria-hidden="true">
-                            <x-lucide-chevron-right class="h-5 w-5 rotate-90 lg:rotate-0" />
-                        </li>
-                    @endunless
-                @endforeach
-            </ol>
-        </section>
-    @endif
-
     @if($imageCount)
         <section class="page-container pt-20 sm:pt-24" aria-labelledby="gallery-title" x-data="projectGallery(@js($gallery))">
             <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -212,6 +182,36 @@
                     @endif
                 </div>
             </dialog>
+        </section>
+    @endif
+
+    @if($steps)
+        <section class="page-container pt-20 sm:pt-24" aria-labelledby="pipeline-title">
+            <p class="eyebrow">Architecture & workflow</p>
+            <h2 id="pipeline-title" class="mt-3 text-[1.75rem] font-bold tracking-[-0.025em] text-content sm:text-[2rem]">How work moves through the pipeline</h2>
+
+            <ol class="mt-8 flex flex-col items-stretch gap-3 rounded-[1.25rem] border border-edge bg-surface p-4 sm:p-8 lg:flex-row lg:items-center">
+                @foreach($steps as $i => $step)
+                    @php $last = $loop->last; @endphp
+                    <li class="flex flex-1 flex-col gap-3.5 rounded-[0.875rem] border p-6 {{ $last ? 'border-accent/30 bg-accent/10' : 'border-edge bg-surface-inset' }}">
+                        <div class="flex items-center justify-between">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-[0.625rem] {{ $last ? 'bg-accent/15 text-accent' : 'bg-surface-raised text-content-secondary' }}">
+                                <x-dynamic-component :component="'lucide-' . $stepIcons[$i % count($stepIcons)]" class="h-5 w-5" />
+                            </span>
+                            <span class="text-[0.8125rem] font-semibold tabular-nums text-content-secondary">{{ sprintf('%02d', $i + 1) }}</span>
+                        </div>
+                        <h3 class="text-[1.0625rem] font-semibold text-content">{{ $step['name'] }}</h3>
+                        @if($step['description'])
+                            <p class="text-sm leading-[1.375rem] text-content-secondary">{{ $step['description'] }}</p>
+                        @endif
+                    </li>
+                    @unless($last)
+                        <li class="flex justify-center text-content-faint" aria-hidden="true">
+                            <x-lucide-chevron-right class="h-5 w-5 rotate-90 lg:rotate-0" />
+                        </li>
+                    @endunless
+                @endforeach
+            </ol>
         </section>
     @endif
 
