@@ -21,6 +21,9 @@
 
     $featured = $projects->firstWhere('is_featured', true) ?? $projects->first();
     $secondary = $featured ? $projects->where('id', '!=', $featured->id)->take(2) : collect();
+    $featuredThumb = $featured ? ($featured->cover_image_url ?? $featured->images->first()?->url) : null;
+    $featuredSteps = $featured ? array_slice($featured->steps, 0, 4) : [];
+    $stepIcons = ['file-scan', 'scan-text', 'shield-check', 'database'];
 
     // The three latest roles get the full entry; older ones collapse into compact rows.
     $recentRoles = $careers->take(3);
@@ -95,7 +98,7 @@
             </div>
 
             <article class="relative mt-12 flex flex-col overflow-hidden rounded-2xl border border-edge bg-surface transition hover:border-content-faint lg:min-h-[27.5rem] lg:flex-row">
-                <div class="flex flex-col justify-between gap-8 p-6 sm:p-12 lg:w-[35rem] lg:shrink-0">
+                <div class="flex flex-col justify-between gap-8 p-6 sm:p-12 {{ $featuredThumb ? 'lg:w-[35rem] lg:shrink-0' : 'lg:flex-1' }}">
                     <div>
                         <p class="text-[0.8125rem] font-medium text-content-secondary">{{ $featured->category }} · {{ $featured->role }}</p>
                         <h3 class="mt-4 text-[1.625rem] font-bold leading-9 tracking-[-0.02em] text-content sm:text-[1.875rem]">
@@ -103,20 +106,39 @@
                         </h3>
                         <p class="mt-4 text-base leading-[1.625rem] text-content-secondary">{{ $featured->teaser }}</p>
                     </div>
-                    @if(!empty($featured->impact_highlights))
-                        <dl class="flex flex-wrap gap-x-10 gap-y-5">
-                            @foreach(array_slice($featured->impact_highlights, 0, 2) as $h)
-                                <div class="flex flex-col-reverse gap-1.5">
-                                    <dt class="text-[0.8125rem] text-content-secondary">{{ $h['label'] }}</dt>
-                                    <dd class="text-[1.625rem] font-bold tracking-[-0.02em] text-accent">{{ $h['metric'] }}</dd>
-                                </div>
-                            @endforeach
-                        </dl>
-                    @endif
+                    <div class="flex flex-col gap-7">
+                        @if(!empty($featured->impact_highlights))
+                            <dl class="flex flex-wrap gap-x-10 gap-y-5">
+                                @foreach(array_slice($featured->impact_highlights, 0, 2) as $h)
+                                    <div class="flex flex-col-reverse gap-1.5">
+                                        <dt class="text-[0.8125rem] text-content-secondary">{{ $h['label'] }}</dt>
+                                        <dd class="text-[1.625rem] font-bold tracking-[-0.02em] text-accent">{{ $h['metric'] }}</dd>
+                                    </div>
+                                @endforeach
+                            </dl>
+                        @endif
+                        @if($featuredSteps)
+                            {{-- Compact flow; the last step is the live output. --}}
+                            <ol class="flex flex-wrap items-center gap-2 border-t border-edge pt-6" aria-label="{{ $featured->title }} pipeline">
+                                @foreach($featuredSteps as $i => $step)
+                                    <li class="flex items-center gap-2">
+                                        <span class="inline-flex min-h-8 items-center gap-2 rounded-lg border px-2.5 text-[0.8125rem] font-medium {{ $loop->last ? 'border-accent/30 bg-accent/10 text-accent' : 'border-edge bg-surface-raised text-content' }}">
+                                            <x-dynamic-component :component="'lucide-' . $stepIcons[$i]" class="h-3.5 w-3.5 {{ $loop->last ? '' : 'text-content-secondary' }}" />
+                                            {{ $step['name'] }}
+                                            @if($loop->last)<span class="sr-only">(live)</span>@endif
+                                        </span>
+                                        @unless($loop->last)
+                                            <x-lucide-arrow-right class="h-3.5 w-3.5 text-content-secondary" aria-hidden="true" />
+                                        @endunless
+                                    </li>
+                                @endforeach
+                            </ol>
+                        @endif
+                    </div>
                 </div>
-                @if(!empty($featured->steps))
-                    <div class="flex flex-1 items-center justify-center border-t border-edge bg-surface-deep p-6 sm:p-12 lg:border-l lg:border-t-0">
-                        @include('projects._pipeline', ['project' => $featured])
+                @if($featuredThumb)
+                    <div class="relative aspect-[16/10] overflow-hidden border-t border-edge bg-surface-deep lg:aspect-auto lg:flex-1 lg:border-l lg:border-t-0">
+                        <img src="{{ $featuredThumb }}" alt="" loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-cover">
                     </div>
                 @endif
             </article>
