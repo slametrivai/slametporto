@@ -90,7 +90,7 @@
             <div class="admin-card-header">
                 <div>
                     <h3 class="admin-card-title">Kontak</h3>
-                    <p class="admin-card-desc">Tampil di footer, section kontak, dan resume. Kosongkan untuk menyembunyikan tautannya.</p>
+                    <p class="admin-card-desc">Tampil di footer, section kontak, resume, dan /linkbio. Kosongkan untuk menyembunyikan tautannya.</p>
                 </div>
             </div>
             <div class="admin-card-body">
@@ -111,6 +111,12 @@
                     <label for="linkedin_url" class="admin-label">URL profil LinkedIn</label>
                     <input id="linkedin_url" type="url" name="linkedin_url" value="{{ old('linkedin_url', $settings['linkedin_url'] ?? '') }}" class="admin-input"
                            placeholder="https://www.linkedin.com/in/username">
+                </div>
+
+                <div>
+                    <label for="github_url" class="admin-label">URL profil GitHub</label>
+                    <input id="github_url" type="url" name="github_url" value="{{ old('github_url', $settings['github_url'] ?? '') }}" class="admin-input"
+                           placeholder="https://github.com/username">
                 </div>
             </div>
         </div>

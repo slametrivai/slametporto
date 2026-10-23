@@ -5,8 +5,16 @@
 @tailwind utilities;
 
 @layer base {
+    html {
+        color-scheme: dark;
+    }
+
     body {
-        @apply bg-gray-50 font-outfit font-normal text-gray-700;
+        @apply bg-void font-sans font-normal text-gray-600 antialiased;
+    }
+
+    dialog {
+        @apply text-gray-600 ring-1 ring-gray-200;
     }
 
     [x-cloak] {
@@ -15,61 +23,60 @@
 }
 
 /*
- * TailAdmin v2 patterns. Deviations from the template, all for WCAG AA (R-25/R-03):
- * active/brand text uses brand-600 (brand-500 is 4.34:1 on brand-50), badges use -700 text,
- * helper text and placeholders use gray-500 (gray-400 is 2.58:1), focus border is brand-500,
- * and menu items / buttons are at least 44px tall.
+ * Studio admin patterns from slametrivai.pen (Admin — Dashboard). The amber only passes WCAG
+ * on the dark surfaces, so text on amber is always `void`. Muted text is gray-500 (#9CA3AF, 7:1 on
+ * the card); gray-400 (#6B7280) is reserved for placeholders, hints and table headings at 3.8:1+.
  */
 @layer components {
     .menu-item {
-        @apply relative flex items-center gap-3 rounded-lg px-3 py-3 text-theme-sm font-medium;
+        @apply relative flex min-h-10 items-center gap-2.5 rounded-lg px-2.5 text-theme-sm font-medium transition-colors;
     }
     .menu-item-active {
-        @apply bg-brand-50 text-brand-600;
+        @apply bg-brand-500/10 font-semibold text-gray-800 before:absolute before:left-0 before:top-2.5 before:h-5 before:w-[3px] before:rounded-sm before:bg-brand-500;
     }
     .menu-item-inactive {
-        @apply text-gray-700 hover:bg-gray-100 hover:text-gray-700;
+        @apply text-gray-500 hover:bg-gray-50 hover:text-gray-800;
     }
     .menu-item-icon-active {
-        @apply text-brand-600;
+        @apply text-brand-500;
     }
     .menu-item-icon-inactive {
-        @apply text-gray-500 group-hover:text-gray-700;
+        @apply text-gray-400 group-hover:text-gray-500;
     }
 
     .admin-card {
-        @apply rounded-2xl border border-gray-200 bg-white;
+        @apply rounded-xl border border-gray-200 bg-white;
     }
     .admin-card-header {
-        @apply flex flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5;
+        @apply flex flex-wrap items-center justify-between gap-3 px-5 py-[18px];
     }
     .admin-card-title {
-        @apply text-base font-medium text-gray-800;
+        @apply text-[15px] font-semibold text-gray-800;
     }
     .admin-card-desc {
-        @apply mt-1 text-theme-sm text-gray-500;
+        @apply mt-1 text-[13px] text-gray-500;
     }
     .admin-card-body {
         @apply space-y-6 border-t border-gray-100 p-5 sm:p-6;
     }
 
     .admin-label {
-        @apply mb-1.5 block text-sm font-medium text-gray-700;
+        @apply mb-2 block text-sm font-medium text-gray-800;
     }
     .admin-input {
-        @apply h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-500 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+        @apply h-11 w-full rounded-[10px] border border-gray-200 bg-void px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
     }
     .admin-select {
         @apply admin-input pr-11;
     }
     .admin-textarea {
-        @apply w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-500 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+        @apply w-full rounded-[10px] border border-gray-200 bg-void px-3.5 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
     }
     .admin-file {
-        @apply h-11 w-full cursor-pointer overflow-hidden rounded-lg border border-gray-300 bg-transparent text-sm text-gray-500 shadow-theme-xs transition-colors file:mr-5 file:h-full file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-gray-200 file:bg-gray-50 file:px-3.5 file:text-sm file:text-gray-700 hover:file:bg-gray-100 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+        @apply h-11 w-full cursor-pointer overflow-hidden rounded-[10px] border border-gray-200 bg-void text-sm text-gray-500 transition-colors file:mr-5 file:h-full file:cursor-pointer file:border-0 file:border-r file:border-solid file:border-gray-200 file:bg-gray-50 file:px-3.5 file:text-sm file:text-gray-700 hover:file:bg-gray-100 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
     }
     .admin-checkbox {
-        @apply h-5 w-5 cursor-pointer rounded border-gray-300 text-brand-500 focus:ring-3 focus:ring-brand-500/20 focus:ring-offset-0;
+        @apply h-5 w-5 cursor-pointer rounded border-gray-300 bg-void text-brand-500 focus:ring-3 focus:ring-brand-500/20 focus:ring-offset-0;
     }
     .admin-help {
         @apply mt-1.5 text-theme-xs text-gray-500;
@@ -79,51 +86,64 @@
     }
 
     .admin-btn {
-        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium shadow-theme-xs transition focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
+        @apply inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40 disabled:cursor-not-allowed disabled:opacity-60;
     }
     .admin-btn-primary {
-        @apply admin-btn bg-brand-500 text-white hover:bg-brand-600;
+        @apply admin-btn bg-brand-500 text-void hover:bg-brand-400;
     }
     .admin-btn-outline {
-        @apply admin-btn bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50;
+        @apply admin-btn bg-transparent text-gray-700 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-800;
     }
     .admin-btn-danger {
-        @apply admin-btn bg-error-600 text-white hover:bg-error-700;
+        @apply admin-btn bg-error-500 text-void hover:bg-error-700;
     }
     .admin-icon-btn {
-        @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 shadow-theme-xs transition hover:bg-gray-50 hover:text-gray-800 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
+        @apply inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-transparent text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
     }
     .admin-icon-btn-danger {
         @apply hover:bg-error-50 hover:text-error-600;
     }
     .admin-link {
-        @apply font-medium text-brand-600 hover:underline focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
+        @apply font-semibold text-brand-500 hover:underline focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
     }
 
     .admin-badge {
-        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-theme-xs font-medium;
+        @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-theme-xs font-semibold;
     }
     .admin-badge-success {
-        @apply bg-success-50 text-success-700;
+        @apply bg-success-50 text-success-500;
     }
     .admin-badge-warning {
-        @apply bg-warning-50 text-warning-700;
+        @apply bg-warning-50 text-warning-500;
     }
     .admin-badge-error {
-        @apply bg-error-50 text-error-700;
+        @apply bg-error-50 text-error-500;
     }
     .admin-badge-brand {
-        @apply bg-brand-50 text-brand-600;
+        @apply bg-brand-50 text-brand-500;
+    }
+    .admin-badge-info {
+        @apply bg-info-50 text-info-500;
     }
     .admin-badge-gray {
-        @apply bg-gray-100 text-gray-700;
+        @apply bg-gray-50 text-gray-500;
+    }
+    .admin-badge-dot {
+        @apply before:h-1.5 before:w-1.5 before:rounded-full before:bg-current;
     }
 
     .admin-alert-success {
-        @apply rounded-xl border border-success-500 bg-success-50 p-4 text-sm text-gray-800;
+        @apply rounded-xl border border-success-500/40 bg-success-50 p-4 text-sm text-gray-800;
     }
     .admin-alert-error {
-        @apply rounded-xl border border-error-500 bg-error-50 p-4 text-sm text-gray-800;
+        @apply rounded-xl border border-error-500/40 bg-error-50 p-4 text-sm text-gray-800;
+    }
+
+    .admin-tab {
+        @apply -mb-px inline-flex min-h-10 items-center border-b-2 border-transparent text-sm font-medium text-gray-500 transition-colors hover:text-gray-800 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40;
+    }
+    .admin-tab-active {
+        @apply border-gray-800 font-semibold text-gray-800;
     }
 }
 
@@ -136,10 +156,10 @@
     @apply inline-flex items-center gap-2 text-theme-sm text-gray-500;
 }
 .dataTables_wrapper .dataTables_length select {
-    @apply h-11 rounded-lg border border-gray-300 bg-transparent py-0 pl-3 pr-8 text-sm text-gray-800 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+    @apply h-10 rounded-lg border border-gray-200 bg-void py-0 pl-3 pr-8 text-sm text-gray-800 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
 }
 .dataTables_wrapper .dataTables_filter input {
-    @apply ml-0 h-11 w-56 rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
+    @apply ml-0 h-10 w-56 rounded-lg border border-gray-200 bg-void px-3.5 text-sm text-gray-800 focus:border-brand-500 focus:outline-none focus:ring-3 focus:ring-brand-500/20;
 }
 .dataTables_wrapper table.dataTable {
     @apply my-0 w-full;
@@ -148,12 +168,15 @@
     @apply border-b border-gray-100;
 }
 .dataTables_wrapper table.dataTable thead th {
-    @apply whitespace-nowrap border-y border-gray-100 px-4 py-3 text-left text-theme-xs font-medium text-gray-500;
+    @apply whitespace-nowrap border-y border-gray-100 px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400;
 }
 .dataTables_wrapper table.dataTable thead th.sorting,
 .dataTables_wrapper table.dataTable thead th.sorting_asc,
 .dataTables_wrapper table.dataTable thead th.sorting_desc {
     @apply pr-8;
+}
+.dataTables_wrapper table.dataTable tbody tr {
+    @apply bg-transparent;
 }
 .dataTables_wrapper table.dataTable tbody td {
     @apply border-b border-gray-100 px-4 py-3 align-middle text-theme-sm text-gray-500;
@@ -162,7 +185,7 @@
     @apply border-b-0;
 }
 .dataTables_wrapper table.dataTable tbody tr:hover > td {
-    @apply bg-gray-50;
+    @apply bg-void/40;
 }
 .dataTables_wrapper .dataTables_info {
     @apply p-0 text-theme-sm text-gray-500;
@@ -171,16 +194,43 @@
     @apply flex flex-wrap items-center gap-1 p-0;
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button {
-    @apply m-0 inline-flex h-11 min-w-11 items-center justify-center rounded-lg !border-0 !bg-none px-3 text-sm font-medium !text-gray-700 hover:!bg-brand-50 hover:!text-brand-600;
+    @apply m-0 inline-flex h-10 min-w-10 items-center justify-center rounded-lg !border-0 !bg-none px-3 text-sm font-medium !text-gray-500 hover:!bg-gray-50 hover:!text-gray-800;
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button.current,
 .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-    @apply !bg-brand-500 !text-white;
+    @apply !bg-brand-500 !text-void;
 }
 .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
 .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
-    @apply cursor-not-allowed !bg-transparent !text-gray-500 opacity-60;
+    @apply cursor-not-allowed !bg-transparent !text-gray-400 opacity-60;
 }
 .dataTables_wrapper .dataTables_processing {
     @apply rounded-xl border border-gray-200 bg-white text-theme-sm text-gray-700 shadow-theme-lg;
+}
+.dataTables_wrapper .dataTables_processing > div:last-child > div {
+    @apply bg-brand-500;
+}
+
+/* SweetAlert2 v11 ships a light popup; match the card surface. */
+.swal2-popup {
+    @apply rounded-2xl border border-gray-200 bg-white text-gray-600;
+}
+.swal2-title {
+    @apply text-gray-800;
+}
+.swal2-html-container {
+    @apply text-gray-500;
+}
+.swal2-styled.swal2-confirm,
+.swal2-styled.swal2-cancel {
+    @apply rounded-lg text-sm font-semibold;
+}
+.swal2-styled.swal2-confirm {
+    @apply text-void;
+}
+.swal2-styled.swal2-cancel {
+    @apply text-gray-800;
+}
+div:where(.swal2-container).swal2-backdrop-show {
+    @apply bg-gray-900/70;
 }

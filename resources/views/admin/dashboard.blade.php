@@ -1,93 +1,272 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Dashboard')
-
-@section('actions')
-    <a href="{{ route('admin.posts.create') }}" class="admin-btn-outline">Tulis artikel</a>
-    <a href="{{ route('admin.projects.create') }}" class="admin-btn-primary">Tambah studi kasus</a>
-@endsection
+@section('title', 'Ringkasan')
 
 @php
-    $metrics = [
-        ['label' => 'Studi kasus', 'value' => $stats['active_projects'], 'route' => 'admin.projects.index', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
-        ['label' => 'Klien tampil', 'value' => $stats['total_clients'], 'route' => 'admin.clients.index', 'icon' => 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'],
-        ['label' => 'Artikel terbit', 'value' => $stats['published_posts'], 'route' => 'admin.posts.index', 'icon' => 'M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z'],
-        ['label' => 'Pesan baru', 'value' => $stats['new_inquiries'], 'route' => 'admin.inquiries.index', 'icon' => 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'],
+    $num = fn ($n) => number_format($n, 0, ',', '.');
+    $firstName = \Illuminate\Support\Str::before(trim(auth()->user()->name), ' ');
+
+    $chartMax = max(4, (int) ceil($chart->max(fn ($w) => $w['projects'] + $w['posts']) / 4) * 4);
+    $chartTotal = $chart->sum(fn ($w) => $w['projects'] + $w['posts']);
+    $series = [
+        'projects' => ['label' => 'Studi kasus', 'class' => 'bg-series-case'],
+        'posts' => ['label' => 'Artikel', 'class' => 'bg-series-post'],
+    ];
+
+    $typeLabel = ['project' => 'Studi kasus', 'post' => 'Artikel'];
+    $statusBadge = [
+        'published' => ['Terbit', 'admin-badge-success'],
+        'scheduled' => ['Terjadwal', 'admin-badge-info'],
+        'draft' => ['Draf', 'admin-badge-gray'],
+    ];
+    $tabs = [
+        'all' => ['Semua', $recentContent->count()],
+        'project' => ['Studi kasus', $recentContent->where('type', 'project')->count()],
+        'post' => ['Artikel', $recentContent->where('type', 'post')->count()],
+        'draft' => ['Draf', $recentContent->where('status', 'draft')->count()],
     ];
 @endphp
 
+@section('page_header')
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div class="flex flex-col gap-1.5">
+            <h1 class="text-title-sm font-bold tracking-[-0.5px] text-gray-800">Halo, {{ $firstName }}</h1>
+            <p class="flex flex-wrap items-center gap-x-1.5 text-sm">
+                @if($unanswered['count'])
+                    <a href="{{ route('admin.inquiries.index') }}" class="font-medium text-brand-500 hover:underline">{{ $unanswered['count'] }} pesan menunggu balasan</a>
+                @else
+                    <span class="text-gray-500">Semua pesan sudah dibalas</span>
+                @endif
+                @if($lastUpdated)
+                    <span class="text-gray-500">· konten terakhir diperbarui {{ $lastUpdated->locale('id')->diffForHumans() }}</span>
+                @endif
+            </p>
+        </div>
+        <a href="{{ route('admin.posts.create') }}" class="admin-btn-outline">
+            <x-admin.icon name="pen-line" class="h-4 w-4" />
+            Tulis artikel
+        </a>
+    </div>
+@endsection
+
 @section('content')
-<div class="space-y-6">
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 xl:grid-cols-4">
+<div class="flex flex-col gap-6">
+    {{-- KPI row --}}
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach($metrics as $m)
-            <div class="rounded-2xl border border-gray-200 bg-white p-5 md:p-6">
-                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gray-100">
-                    <svg class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $m['icon'] }}"/></svg>
+            @php $sparkMax = max(1, max($m['spark'])); @endphp
+            <a href="{{ route($m['route']) }}" class="admin-card group flex flex-col gap-3.5 p-5 transition-colors hover:border-gray-300 focus:outline-none focus-visible:ring-3 focus-visible:ring-brand-500/40">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="flex items-center gap-2 text-[13px] font-medium text-gray-500">
+                        <x-admin.icon :name="$m['icon']" class="h-4 w-4 text-gray-400" />
+                        {{ $m['label'] }}
+                    </span>
+                    <span class="admin-badge {{ $m['delta'] ? 'admin-badge-success' : 'admin-badge-gray' }}" title="Bertambah dalam 30 hari terakhir">
+                        <x-admin.icon :name="$m['delta'] ? 'trending-up' : 'minus'" class="h-3 w-3" />
+                        {{ $m['delta'] ? '+' . $num($m['delta']) : '0' }}
+                        <span class="sr-only">dalam 30 hari terakhir</span>
+                    </span>
                 </div>
-                <div class="mt-5 flex items-end justify-between gap-3">
-                    <div>
-                        <span class="text-sm text-gray-500">{{ $m['label'] }}</span>
-                        <p class="mt-2 text-title-sm font-bold text-gray-800">{{ $m['value'] }}</p>
-                    </div>
-                    <a href="{{ route($m['route']) }}" class="admin-link inline-flex min-h-11 items-center text-theme-sm">Kelola<span class="sr-only"> {{ strtolower($m['label']) }}</span></a>
+                <div class="flex items-end justify-between gap-3">
+                    <span class="font-mono text-[28px] font-bold leading-none tracking-[-0.8px] text-gray-800">{{ $num($m['value']) }}</span>
+                    <span class="flex h-8 items-end gap-[3px]" title="Tren {{ count($m['spark']) }} minggu terakhir" aria-hidden="true">
+                        @foreach($m['spark'] as $i => $v)
+                            <span class="w-[5px] rounded-[1.5px] {{ $loop->last ? 'bg-brand-500' : 'bg-gray-300' }}" style="height: {{ max(3, round($v / $sparkMax * 32)) }}px"></span>
+                        @endforeach
+                    </span>
                 </div>
-            </div>
+            </a>
         @endforeach
     </div>
 
-    <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <div class="admin-card">
-            <div class="admin-card-header">
-                <h3 class="admin-card-title">Pesan terbaru</h3>
-                <a href="{{ route('admin.inquiries.index') }}" class="admin-link inline-flex min-h-11 items-center text-theme-sm">Semua pesan</a>
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_400px]">
+        {{-- Weekly publishing chart --}}
+        <section class="admin-card flex flex-col" aria-labelledby="chart-title">
+            <div class="admin-card-header items-start">
+                <div>
+                    <h2 id="chart-title" class="admin-card-title">Konten terbit per minggu</h2>
+                    <p class="admin-card-desc">{{ $chart->count() }} minggu terakhir · {{ $num($chartTotal) }} terbit</p>
+                </div>
+                <ul class="flex items-center gap-4 text-[13px] text-gray-500" aria-label="Legenda">
+                    @foreach($series as $s)
+                        <li class="flex items-center gap-1.5"><span class="h-2.5 w-2.5 rounded-sm {{ $s['class'] }}" aria-hidden="true"></span>{{ $s['label'] }}</li>
+                    @endforeach
+                </ul>
             </div>
-            <ul class="divide-y divide-gray-100 border-t border-gray-100">
-                @forelse($recentInquiries as $inq)
-                    <li class="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
-                        <div class="min-w-0">
-                            <p class="flex items-center gap-2 text-theme-sm font-medium text-gray-800">
-                                <span class="truncate">{{ $inq->name }}</span>
-                                @if($inq->status === 'new')
-                                    <span class="admin-badge admin-badge-error">Baru</span>
-                                @endif
-                            </p>
-                            <p class="mt-0.5 truncate text-theme-sm text-gray-500">{{ $inq->subject }}</p>
-                            <p class="mt-0.5 text-theme-xs text-gray-500">{{ $inq->created_at->diffForHumans() }}</p>
+
+            <div class="flex flex-1 flex-col px-5 pb-5" x-data="{ tip: null }">
+                <div class="flex min-h-[240px] flex-1 gap-3" aria-hidden="true">
+                    <div class="relative w-6 font-mono text-[11px] leading-none text-gray-400">
+                        @for($t = 0; $t <= 4; $t++)
+                            <span class="absolute right-0 translate-y-1/2" style="bottom: {{ $t * 25 }}%">{{ $chartMax / 4 * $t }}</span>
+                        @endfor
+                    </div>
+                    <div class="relative flex-1">
+                        <div class="absolute inset-0 flex flex-col justify-between">
+                            @for($t = 0; $t <= 4; $t++)
+                                <span class="border-t {{ $t === 4 ? 'border-gray-300' : 'border-dashed border-gray-100' }}"></span>
+                            @endfor
                         </div>
-                        <a href="mailto:{{ $inq->email }}?subject={{ rawurlencode('Re: ' . $inq->subject) }}" class="admin-btn-outline shrink-0">Balas<span class="sr-only"> email ke {{ $inq->name }}</span></a>
+                        <div class="absolute inset-0 flex items-end gap-1.5">
+                            @foreach($chart as $i => $w)
+                                <div class="relative flex h-full flex-1 flex-col justify-end gap-[2px] rounded-t-md px-[3px] transition-colors hover:bg-gray-50/60"
+                                     @mouseenter="tip = {{ $i }}" @mouseleave="tip = null">
+                                    @foreach(['posts', 'projects'] as $key)
+                                        @if($w[$key])
+                                            <span class="w-full {{ $series[$key]['class'] }} {{ $key === 'posts' || ! $w['posts'] ? 'rounded-t-[4px]' : '' }}"
+                                                  style="height: calc({{ $w[$key] / $chartMax * 100 }}% - 1px)"></span>
+                                        @endif
+                                    @endforeach
+                                    <div x-show="tip === {{ $i }}" x-cloak
+                                         class="pointer-events-none absolute bottom-full z-10 mb-2 w-max rounded-lg bg-gray-50 px-3 py-2 text-xs shadow-theme-lg ring-1 ring-gray-200 {{ $i < 2 ? 'left-0' : ($i > $chart->count() - 3 ? 'right-0' : 'left-1/2 -translate-x-1/2') }}">
+                                        <p class="mb-1 font-semibold text-gray-800">Minggu {{ $w['week']->locale('id')->translatedFormat('j M') }}</p>
+                                        @foreach($series as $key => $s)
+                                            <p class="flex items-center gap-2 text-gray-500">
+                                                <span class="h-2 w-2 rounded-sm {{ $s['class'] }}"></span>{{ $s['label'] }}
+                                                <span class="ml-auto pl-3 font-mono font-semibold text-gray-800">{{ $w[$key] }}</span>
+                                            </p>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                <div class="ml-9 mt-2.5 flex gap-1.5 font-mono text-[11px] text-gray-400" aria-hidden="true">
+                    @foreach($chart as $i => $w)
+                        <span class="flex-1 whitespace-nowrap">{{ $i % 3 === 0 ? $w['week']->locale('id')->translatedFormat('j M') : '' }}</span>
+                    @endforeach
+                </div>
+
+                <table class="sr-only">
+                    <caption>Konten terbit per minggu, {{ $chart->count() }} minggu terakhir</caption>
+                    <thead><tr><th scope="col">Minggu mulai</th><th scope="col">Studi kasus</th><th scope="col">Artikel</th></tr></thead>
+                    <tbody>
+                        @foreach($chart as $w)
+                            <tr><th scope="row">{{ $w['week']->locale('id')->translatedFormat('j F Y') }}</th><td>{{ $w['projects'] }}</td><td>{{ $w['posts'] }}</td></tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        {{-- Unanswered inquiries --}}
+        <section class="admin-card flex flex-col" aria-labelledby="inbox-title">
+            <div class="admin-card-header">
+                <div>
+                    <h2 id="inbox-title" class="admin-card-title">Perlu dibalas</h2>
+                    <p class="admin-card-desc">
+                        @if($unanswered['count'])
+                            {{ $unanswered['count'] }} belum dibalas · terlama {{ $unanswered['oldest']->locale('id')->diffForHumans() }}
+                        @else
+                            Tidak ada pesan baru
+                        @endif
+                    </p>
+                </div>
+            </div>
+            <ul class="flex-1">
+                @forelse($unanswered['items'] as $inq)
+                    @php $initials = collect(explode(' ', $inq->name))->filter()->take(2)->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode(''); @endphp
+                    <li class="flex gap-3 border-t border-gray-100 px-5 py-3.5">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-50 text-xs font-semibold text-gray-500" aria-hidden="true">{{ $initials }}</span>
+                        <div class="flex min-w-0 flex-1 flex-col gap-1">
+                            <div class="flex items-center justify-between gap-2">
+                                <p class="truncate text-sm font-semibold text-gray-800">{{ $inq->name }}</p>
+                                <time datetime="{{ $inq->created_at->toIso8601String() }}" class="shrink-0 text-xs text-gray-400">{{ $inq->created_at->locale('id')->shortRelativeDiffForHumans() }}</time>
+                            </div>
+                            <div class="flex min-w-0 items-center gap-2">
+                                <span class="truncate text-xs text-gray-400">{{ $inq->company ?: $inq->email }}</span>
+                                @if($inq->subject && $inq->subject !== 'Website Inquiry')
+                                    <span class="max-w-[50%] shrink-0 truncate rounded-full px-2 py-px text-[11px] font-semibold text-brand-500 ring-1 ring-inset ring-brand-500">{{ $inq->subject }}</span>
+                                @endif
+                            </div>
+                            <p class="line-clamp-2 text-[13px] leading-[19px] text-gray-500">{{ $inq->message }}</p>
+                        </div>
                     </li>
                 @empty
-                    <li class="px-5 py-10 text-center text-theme-sm text-gray-500 sm:px-6">Belum ada pesan masuk dari form kontak.</li>
+                    <li class="flex flex-col items-center gap-2 border-t border-gray-100 px-5 py-12 text-center">
+                        <x-admin.icon name="inbox" class="h-6 w-6 text-gray-400" />
+                        <p class="text-sm text-gray-500">Kotak masuk bersih. Pesan baru dari form kontak muncul di sini.</p>
+                    </li>
                 @endforelse
             </ul>
+            <a href="{{ route('admin.inquiries.index') }}" class="flex min-h-12 items-center justify-center gap-1.5 border-t border-gray-100 text-sm font-semibold text-brand-500 hover:underline focus:outline-none focus-visible:ring-3 focus-visible:ring-inset focus-visible:ring-brand-500/40">
+                Buka kotak masuk <x-admin.icon name="arrow-right" class="h-4 w-4" />
+            </a>
+        </section>
+    </div>
+
+    {{-- Recent content --}}
+    <section class="admin-card overflow-hidden" aria-labelledby="recent-title" x-data="{ tab: 'all' }">
+        <div class="admin-card-header pb-3">
+            <div>
+                <h2 id="recent-title" class="admin-card-title">Konten terbaru</h2>
+                <p class="admin-card-desc">Studi kasus dan artikel yang terakhir diubah</p>
+            </div>
+        </div>
+        <div class="flex gap-5 overflow-x-auto px-5" role="tablist" aria-label="Saring konten">
+            @foreach($tabs as $key => [$label, $count])
+                <button type="button" role="tab" class="admin-tab gap-1.5" :class="tab === '{{ $key }}' && 'admin-tab-active'"
+                        :aria-selected="(tab === '{{ $key }}').toString()" @click="tab = '{{ $key }}'">
+                    {{ $label }} <span class="font-mono text-[11px] font-normal text-gray-400">{{ $count }}</span>
+                </button>
+            @endforeach
         </div>
 
-        <div class="admin-card">
-            <div class="admin-card-header">
-                <h3 class="admin-card-title">Studi kasus terbaru</h3>
-                <a href="{{ route('admin.projects.index') }}" class="admin-link inline-flex min-h-11 items-center text-theme-sm">Semua studi kasus</a>
+        @if($recentContent->isEmpty())
+            <div class="border-t border-gray-100 px-5 py-12 text-center text-sm text-gray-500">
+                Belum ada konten. <a href="{{ route('admin.projects.create') }}" class="admin-link">Tambah studi kasus pertama</a>.
             </div>
-            <ul class="divide-y divide-gray-100 border-t border-gray-100">
-                @forelse($recentProjects as $proj)
-                    <li class="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
-                        <div class="flex min-w-0 items-center gap-3">
-                            @if($proj->cover_image)
-                                <img src="{{ $proj->cover_image_url }}" alt="" class="h-11 w-16 shrink-0 rounded-lg border border-gray-200 object-cover">
-                            @endif
-                            <div class="min-w-0">
-                                <p class="truncate text-theme-sm font-medium text-gray-800">{{ $proj->title }}</p>
-                                <p class="mt-0.5 truncate text-theme-xs text-gray-500">{{ $proj->category }}</p>
-                            </div>
-                        </div>
-                        <a href="{{ route('admin.projects.edit', $proj) }}" class="admin-btn-outline shrink-0">Edit<span class="sr-only"> {{ $proj->title }}</span></a>
-                    </li>
-                @empty
-                    <li class="px-5 py-10 text-center text-theme-sm text-gray-500 sm:px-6">
-                        Belum ada studi kasus. <a href="{{ route('admin.projects.create') }}" class="admin-link">Tambah yang pertama</a>.
-                    </li>
-                @endforelse
-            </ul>
-        </div>
-    </div>
+        @else
+            <div class="overflow-x-auto border-t border-gray-100">
+                <table class="w-full min-w-[720px] text-left">
+                    <thead>
+                        <tr class="border-b border-gray-100 text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-400">
+                            <th scope="col" class="px-5 py-3 font-semibold">Judul</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Tipe</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Status</th>
+                            <th scope="col" class="px-4 py-3 text-right font-semibold">Dilihat</th>
+                            <th scope="col" class="px-4 py-3 font-semibold">Diperbarui</th>
+                            <th scope="col" class="px-5 py-3"><span class="sr-only">Aksi</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentContent as $item)
+                            @php [$statusLabel, $statusClass] = $statusBadge[$item['status']] ?? $statusBadge['draft']; @endphp
+                            <tr x-show="tab === 'all' || tab === '{{ $item['type'] }}' || (tab === 'draft' && {{ $item['status'] === 'draft' ? 'true' : 'false' }})"
+                                class="border-b border-gray-100 transition-colors last:border-b-0 hover:bg-void/40">
+                                <td class="px-5 py-3">
+                                    <div class="flex items-center gap-3">
+                                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-500" aria-hidden="true">
+                                            <x-admin.icon :name="$item['type'] === 'project' ? 'briefcase' : 'pen-line'" class="h-4 w-4" />
+                                        </span>
+                                        <a href="{{ $item['edit_url'] }}" class="line-clamp-1 text-sm font-medium text-gray-800 hover:text-brand-500">{{ $item['title'] }}</a>
+                                    </div>
+                                </td>
+                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">{{ $typeLabel[$item['type']] }}</td>
+                                <td class="whitespace-nowrap px-4 py-3">
+                                    <span class="admin-badge admin-badge-dot {{ $statusClass }}">{{ $statusLabel }}</span>
+                                    @if($item['featured'])
+                                        <span class="admin-badge admin-badge-brand ml-1">Unggulan</span>
+                                    @endif
+                                </td>
+                                <td class="whitespace-nowrap px-4 py-3 text-right font-mono text-sm text-gray-700">{{ $item['views'] === null ? '—' : $num($item['views']) }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 text-sm text-gray-500">
+                                    <time datetime="{{ $item['updated_at']->toIso8601String() }}">
+                                        {{ $item['updated_at']->gt(now()->subDay()) ? $item['updated_at']->locale('id')->diffForHumans() : $item['updated_at']->locale('id')->translatedFormat('j M Y') }}
+                                    </time>
+                                </td>
+                                <td class="px-5 py-3 text-right">
+                                    <a href="{{ $item['edit_url'] }}" class="admin-icon-btn h-8 w-8 border-0" aria-label="Edit {{ $item['title'] }}" title="Edit">
+                                        <x-admin.icon name="square-pen" class="h-4 w-4" />
+                                    </a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </section>
 </div>
 @endsection

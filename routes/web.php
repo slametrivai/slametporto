@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LinkBioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResumeController;
 use App\Http\Controllers\ProjectPublicController;
@@ -29,6 +30,7 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 Route::get('/resume', [ResumeController::class, 'show'])->name('resume.show');
+Route::get('/linkbio', [LinkBioController::class, 'show'])->name('linkbio');
 
 /*
 |--------------------------------------------------------------------------

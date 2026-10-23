@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Inquiry;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,5 +33,10 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Throwable $e) {
             // Failsafe during migration or console execution
         }
+
+        View::composer('admin.layouts.app', function ($view) {
+            // Unread dot on the top-bar bell.
+            $view->with('newInquiries', Inquiry::where('status', 'new')->count());
+        });
     }
 }

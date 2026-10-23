@@ -198,7 +198,8 @@ class PortfolioTest extends TestCase
         // 1. Dashboard
         $response = $this->actingAs($admin)->get('/admin');
         $response->assertStatus(200);
-        $response->assertSee('Studi kasus terbaru');
+        $response->assertSee('Konten terbaru');
+        $response->assertSee('Perlu dibalas');
 
         // 2. Clients Yajra DataTables AJAX response
         $responseDt = $this->actingAs($admin)->getJson('/admin/clients', [

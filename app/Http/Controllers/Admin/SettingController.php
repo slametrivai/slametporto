@@ -38,6 +38,7 @@ class SettingController extends Controller
             'contact_email' => 'nullable|email|max:150',
             'whatsapp_number' => ['nullable', 'string', 'max:25', 'regex:/^[0-9+\s\-()]+$/'],
             'linkedin_url' => 'nullable|url|max:255',
+            'github_url' => 'nullable|url|max:255',
             'site_logo' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
             'site_favicon' => 'nullable|file|mimes:ico,png,svg|max:1024',
         ]);
@@ -93,6 +94,7 @@ class SettingController extends Controller
             'contact_email',
             'whatsapp_number',
             'linkedin_url',
+            'github_url',
         ];
 
         foreach ($textKeys as $key) {
