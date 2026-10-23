@@ -21,7 +21,7 @@
 
     $featured = $projects->firstWhere('is_featured', true) ?? $projects->first();
     $secondary = $featured ? $projects->where('id', '!=', $featured->id)->take(2) : collect();
-    $featuredThumb = $featured ? ($featured->cover_image_url ?? $featured->images->first()?->url) : null;
+    $featuredThumb = $featured?->thumbnail_url;
     $featuredSteps = $featured ? array_slice($featured->steps, 0, 4) : [];
     $stepIcons = ['file-scan', 'scan-text', 'shield-check', 'database'];
 
@@ -137,9 +137,11 @@
                     </div>
                 </div>
                 @if($featuredThumb)
-                    <div class="relative aspect-[16/10] overflow-hidden border-t border-edge bg-surface-deep lg:aspect-auto lg:flex-1 lg:border-l lg:border-t-0">
+                    {{-- Its own link: a positioned panel sits above the title's full-card overlay. --}}
+                    <a href="{{ route('projects.show', $featured->slug) }}" tabindex="-1" aria-hidden="true"
+                       class="relative z-10 block aspect-[16/10] overflow-hidden border-t border-edge bg-surface-deep lg:aspect-auto lg:flex-1 lg:border-l lg:border-t-0">
                         <img src="{{ $featuredThumb }}" alt="" loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-cover">
-                    </div>
+                    </a>
                 @endif
             </article>
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
 
@@ -62,6 +63,26 @@ class Project extends Model
     public function getTeaserAttribute(): string
     {
         return $this->summary ?: $this->challenge;
+    }
+
+    /**
+     * Image for the featured card: the cover, else the first gallery image. Local files that are
+     * missing from the public disk are skipped so the page never renders a broken image.
+     */
+    public function getThumbnailUrlAttribute(): ?string
+    {
+        $paths = array_filter([$this->cover_image, ...$this->images->pluck('path')]);
+
+        foreach ($paths as $path) {
+            if (str_starts_with($path, 'http')) {
+                return $path;
+            }
+            if (Storage::disk('public')->exists($path)) {
+                return asset('storage/' . $path);
+            }
+        }
+
+        return null;
     }
 
     public function getCoverImageUrlAttribute(): ?string
