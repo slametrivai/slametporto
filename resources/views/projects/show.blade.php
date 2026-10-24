@@ -7,13 +7,13 @@
 @php
     $steps = $project->steps;
     $stepIcons = ['file-text', 'scan-text', 'shield-check', 'database'];
-    $images = $project->images;
-    $imageCount = $images->count();
-    $gallery = $images->values()->map(fn ($image, $i) => [
-        'url' => $image->url,
-        'title' => $image->title ?: 'Screen ' . sprintf('%02d', $i + 1),
-        'description' => $image->description,
+    // The cover is screen 01, followed by the uploaded gallery.
+    $gallery = $project->screens->map(fn ($screen, $i) => [
+        'url' => $screen['url'],
+        'title' => $screen['title'] ?: 'Screen ' . sprintf('%02d', $i + 1),
+        'description' => $screen['description'],
     ]);
+    $imageCount = $gallery->count();
     $story = array_values(array_filter([
         ['eyebrow' => 'Operational bottlenecks', 'title' => 'The challenge', 'text' => $project->challenge],
         ['eyebrow' => 'Architecture & implementation', 'title' => 'The solution', 'text' => $project->solution],

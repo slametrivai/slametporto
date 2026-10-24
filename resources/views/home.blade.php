@@ -22,8 +22,6 @@
     $featured = $projects->firstWhere('is_featured', true) ?? $projects->first();
     $secondary = $featured ? $projects->where('id', '!=', $featured->id)->take(2) : collect();
     $featuredThumb = $featured?->thumbnail_url;
-    $featuredSteps = $featured ? array_slice($featured->steps, 0, 4) : [];
-    $stepIcons = ['file-scan', 'scan-text', 'shield-check', 'database'];
 
     // The three latest roles get the full entry; older ones collapse into compact rows.
     $recentRoles = $careers->take(3);
@@ -117,32 +115,10 @@
                                 @endforeach
                             </dl>
                         @endif
-                        @if($featuredSteps)
-                            {{-- Compact flow; the last step is the live output. --}}
-                            <ol class="flex flex-wrap items-center gap-2 border-t border-edge pt-6" aria-label="{{ $featured->title }} pipeline">
-                                @foreach($featuredSteps as $i => $step)
-                                    <li class="flex items-center gap-2">
-                                        <span class="inline-flex min-h-8 items-center gap-2 rounded-lg border px-2.5 text-[0.8125rem] font-medium {{ $loop->last ? 'border-accent/30 bg-accent/10 text-accent' : 'border-edge bg-surface-raised text-content' }}">
-                                            <x-dynamic-component :component="'lucide-' . $stepIcons[$i]" class="h-3.5 w-3.5 {{ $loop->last ? '' : 'text-content-secondary' }}" />
-                                            {{ $step['name'] }}
-                                            @if($loop->last)<span class="sr-only">(live)</span>@endif
-                                        </span>
-                                        @unless($loop->last)
-                                            <x-lucide-arrow-right class="h-3.5 w-3.5 text-content-secondary" aria-hidden="true" />
-                                        @endunless
-                                    </li>
-                                @endforeach
-                            </ol>
-                        @endif
+                        @include('projects._flow', ['project' => $featured])
                     </div>
                 </div>
-                @if($featuredThumb)
-                    {{-- Its own link: a positioned panel sits above the title's full-card overlay. --}}
-                    <a href="{{ route('projects.show', $featured->slug) }}" tabindex="-1" aria-hidden="true"
-                       class="relative z-10 block aspect-[16/10] overflow-hidden border-t border-edge bg-surface-deep lg:aspect-auto lg:flex-1 lg:border-l lg:border-t-0">
-                        <img src="{{ $featuredThumb }}" alt="" loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-cover">
-                    </a>
-                @endif
+                @include('projects._thumb', ['project' => $featured, 'url' => $featuredThumb])
             </article>
 
             @if($secondary->isNotEmpty())

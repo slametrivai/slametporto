@@ -25,9 +25,9 @@ class ProjectPublicController extends Controller
             'featured' => $allProjects->where('is_featured', true)->count(),
         ];
 
-        $featuredProject = $filtering ? null : (Project::where('is_featured', true)->orderBy('sort_order')->first() ?? Project::orderBy('sort_order')->first());
+        $featuredProject = $filtering ? null : (Project::with('images')->where('is_featured', true)->orderBy('sort_order')->first() ?? Project::with('images')->orderBy('sort_order')->first());
 
-        $query = Project::query()->when($featuredProject, fn ($q) => $q->whereKeyNot($featuredProject->id));
+        $query = Project::with('images')->when($featuredProject, fn ($q) => $q->whereKeyNot($featuredProject->id));
 
         if ($selectedCategory && $selectedCategory !== 'All') {
             $query->where('category', $selectedCategory);

@@ -29,13 +29,14 @@
     ])
 
     @if($featuredProject)
+        @php $featuredThumb = $featuredProject->thumbnail_url; @endphp
         <section class="page-container pt-12" aria-labelledby="featured-title">
             <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-accent">
                 <x-lucide-star class="h-3.5 w-3.5" />
                 Featured
             </p>
             <article class="relative mt-5 flex flex-col overflow-hidden rounded-2xl border border-edge bg-surface transition hover:border-content-faint lg:min-h-[28.75rem] lg:flex-row">
-                <div class="flex flex-col justify-center gap-7 p-6 sm:p-12 lg:w-[38.75rem] lg:shrink-0">
+                <div class="flex flex-col justify-center gap-7 p-6 sm:p-12 {{ $featuredThumb ? 'lg:w-[38.75rem] lg:shrink-0' : 'lg:flex-1' }}">
                     <div>
                         <p class="text-[0.8125rem] font-medium text-content-secondary">{{ $featuredProject->category }} · {{ $featuredProject->role }}</p>
                         <h2 id="featured-title" class="mt-4 text-[1.625rem] font-bold leading-9 tracking-[-0.02em] text-content sm:text-[1.875rem]">
@@ -53,16 +54,13 @@
                             @endforeach
                         </dl>
                     @endif
+                    @include('projects._flow', ['project' => $featuredProject])
                     <span class="inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-content" aria-hidden="true">
                         Read full case study
                         <x-lucide-arrow-right class="h-4 w-4" />
                     </span>
                 </div>
-                @if(!empty($featuredProject->steps))
-                    <div class="flex flex-1 items-center justify-center border-t border-edge bg-surface-deep p-6 sm:p-12 lg:border-l lg:border-t-0">
-                        @include('projects._pipeline', ['project' => $featuredProject])
-                    </div>
-                @endif
+                @include('projects._thumb', ['project' => $featuredProject, 'url' => $featuredThumb])
             </article>
         </section>
     @endif

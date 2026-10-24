@@ -1,7 +1,18 @@
-{{-- One row of the case study list: identity, story with pipeline flow, two metrics. --}}
-@php $steps = array_slice($project->steps, 0, 4); @endphp
+{{-- One row of the case study list: thumbnail, identity, story with pipeline flow, two metrics. --}}
+@php
+    $steps = array_slice($project->steps, 0, 4);
+    $thumb = $project->thumbnail_url;
+@endphp
 <li class="group relative flex flex-col gap-6 border-t border-edge py-9 lg:flex-row lg:gap-10">
-    <div class="lg:w-[22.5rem] lg:shrink-0">
+    {{-- Not positioned, so the title's full-row overlay makes the image clickable too. --}}
+    <div class="flex aspect-[16/10] w-full shrink-0 items-center justify-center overflow-hidden rounded-xl border border-edge bg-surface-deep sm:w-64 lg:w-44">
+        @if($thumb)
+            <img src="{{ $thumb }}" alt="" loading="lazy" decoding="async" class="h-full w-full object-cover transition duration-300 group-hover:opacity-90">
+        @else
+            <x-lucide-layers class="h-6 w-6 text-content-secondary" aria-hidden="true" />
+        @endif
+    </div>
+    <div class="lg:w-[20rem] lg:shrink-0">
         <p class="flex flex-wrap items-center gap-2">
             <span class="chip border border-edge px-2.5 py-1 text-xs text-content-secondary">{{ $project->category }}</span>
             @if($project->is_featured)

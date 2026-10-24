@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
@@ -66,23 +67,40 @@ class Project extends Model
     }
 
     /**
-     * Image for the featured card: the cover, else the first gallery image. Local files that are
+     * Screens for the case study page: the cover first, then the gallery in order. Local files
      * missing from the public disk are skipped so the page never renders a broken image.
+     *
+     * @return \Illuminate\Support\Collection<int, array{url: string, title: ?string, description: ?string}>
      */
+    public function getScreensAttribute(): Collection
+    {
+        return collect([['path' => $this->cover_image, 'title' => null, 'description' => null]])
+            ->concat($this->images->map(fn (ProjectImage $image) => $image->only(['path', 'title', 'description'])))
+            ->map(fn ($screen) => ['url' => self::publicUrl($screen['path'])] + $screen)
+            ->filter(fn ($screen) => $screen['url'])
+            ->map(fn ($screen) => collect($screen)->except('path')->all())
+            ->values();
+    }
+
+    /** Thumbnail for cards: the first existing image (cover, else gallery), checked lazily. */
     public function getThumbnailUrlAttribute(): ?string
     {
-        $paths = array_filter([$this->cover_image, ...$this->images->pluck('path')]);
+        return collect([$this->cover_image])->concat($this->images->pluck('path'))
+            ->lazy()
+            ->map(fn ($path) => self::publicUrl($path))
+            ->first(fn ($url) => $url);
+    }
 
-        foreach ($paths as $path) {
-            if (str_starts_with($path, 'http')) {
-                return $path;
-            }
-            if (Storage::disk('public')->exists($path)) {
-                return asset('storage/' . $path);
-            }
+    private static function publicUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+        if (str_starts_with($path, 'http')) {
+            return $path;
         }
 
-        return null;
+        return Storage::disk('public')->exists($path) ? asset('storage/' . $path) : null;
     }
 
     public function getCoverImageUrlAttribute(): ?string
