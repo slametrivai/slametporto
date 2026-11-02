@@ -84,7 +84,7 @@
                     @if($i === 1)
                         <div class="grid {{ $imageCount > 2 ? 'grid-cols-2' : 'grid-cols-1' }} gap-4 lg:flex lg:flex-col lg:gap-5">
                     @endif
-                    <button type="button" @click="open({{ $i }})" class="{{ $shot }} {{ $i === 0 ? 'aspect-[820/480] lg:aspect-auto lg:h-full' : 'aspect-[440/240] lg:aspect-auto lg:min-h-0 lg:flex-1' }}">
+                    <button type="button" @click="open({{ $i }})" class="{{ $shot }} {{ $i === 0 ? 'aspect-[820/480] lg:aspect-auto ' . ($imageCount > 1 ? 'lg:h-full' : 'lg:h-[30rem]') : 'aspect-[440/240] lg:aspect-auto lg:min-h-0 lg:flex-1' }}">
                         <img src="{{ $item['url'] }}" alt="{{ $item['title'] }}" loading="lazy" decoding="async" class="{{ $shotImg }}">
                         @if($i === 2 && $imageCount > 3)
                             <span class="absolute inset-0 flex items-center justify-center gap-2.5 bg-ink/80">

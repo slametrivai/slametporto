@@ -87,7 +87,7 @@
     @if($categories->where('posts_count', '>', 0)->count() > 1)
         <section class="page-container flex flex-col gap-6 pb-12 lg:gap-7 lg:pb-20" aria-labelledby="topics-title">
             <h2 id="topics-title" class="text-[2rem] font-semibold text-navy lg:text-[2.75rem]">Browse by topic</h2>
-            <ul class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-6">
+            <ul class="grid grid-cols-1 gap-4 lg:gap-6 {{ $categories->where('posts_count', '>', 0)->count() % 2 ? 'md:grid-cols-3' : 'md:grid-cols-2' }}">
                 @foreach($categories->where('posts_count', '>', 0) as $cat)
                     <li class="group relative flex flex-col gap-2.5 rounded-3xl border border-line p-5 transition-colors hover:border-brand lg:p-7">
                         <div class="flex items-center justify-between">
