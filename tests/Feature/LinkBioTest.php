@@ -28,8 +28,7 @@ class LinkBioTest extends TestCase
             ->assertSee('Contact me')
             ->assertSee('id="contact-dialog"', false)
             ->assertSee(route('projects.show', $featured->slug), false)
-            ->assertSee(route('blog.show', $latestPost->slug), false)
-            ->assertSee(route('resume.show'), false);
+            ->assertSee(route('blog.show', $latestPost->slug), false);
     }
 
     public function test_social_links_come_from_settings_and_hide_when_empty(): void

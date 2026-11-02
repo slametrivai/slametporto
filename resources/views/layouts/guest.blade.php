@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark bg-void">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,7 +21,7 @@
         $siteName = setting('site_name', 'Slamet Rivai');
         $siteInitials = collect(explode(' ', (string) $siteName))->filter()->take(2)->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('');
     @endphp
-    <body class="bg-void font-sans text-content antialiased [color-scheme:dark]">
+    <body class="theme-studio bg-void font-studio text-content antialiased [color-scheme:dark]">
         {{-- Amber glow from the top edge, as in slametrivai.pen "Admin — Login". --}}
         <div class="relative flex min-h-screen flex-col items-center justify-between bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(242,184,75,0.12),transparent)] bg-no-repeat px-4 py-10 sm:px-16">
             @isset($toast)

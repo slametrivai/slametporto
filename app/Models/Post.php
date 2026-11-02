@@ -22,6 +22,7 @@ class Post extends Model
         'excerpt',
         'content',
         'cover_image',
+        'cover_word',
         'status',
         'views_count',
         'published_at',
@@ -51,6 +52,18 @@ class Post extends Model
         $words = str_word_count(strip_tags($this->content));
         $minutes = ceil($words / 200);
         return max(1, (int) $minutes);
+    }
+
+    /** Big word on the thumbnail when there is no cover; falls back to the last word of the title. */
+    public function getThumbnailWordAttribute(): string
+    {
+        if ($this->cover_word) {
+            return $this->cover_word;
+        }
+
+        $words = preg_split('/\s+/', trim(preg_replace('/[^\pL\pN\s-]/u', ' ', $this->title)));
+
+        return (string) end($words);
     }
 
     public function getCoverImageUrlAttribute(): ?string

@@ -15,7 +15,21 @@ export default {
     theme: {
         extend: {
             colors: {
-                // Values from slametrivai.pen (Redesign, Amber). The amber only passes WCAG on the dark surfaces.
+                // slametrivai.pen, Opsi B frames (public site). Body text is 9.7:1 on white, brand is 4.6:1 on white.
+                ink: '#03234D', // nav pill, dark bands, footer
+                navy: '#032D60', // headings on light
+                brand: {
+                    DEFAULT: '#0176D3',
+                    dark: '#014486', // hover, small accent text on panels
+                    glow: '#1B96FF', // radial wash on dark bands
+                },
+                sky: { DEFAULT: '#78B0FD' }, // accent text on ink
+                mist: '#D8E6FE', // body text on ink
+                line: '#AACBFF',
+                panel: '#EEF4FF',
+                body: '#444444',
+
+                // Dark "Studio admin" tokens (Admin — Login frames). Only the login and other auth pages use these.
                 void: {
                     DEFAULT: '#0B0F17',
                     deep: '#05070B', // lightbox and modal scrim
@@ -44,7 +58,8 @@ export default {
                 },
             },
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                sans: ['Urbanist', ...defaultTheme.fontFamily.sans],
+                studio: ['Inter', ...defaultTheme.fontFamily.sans], // auth pages
                 mono: ['"JetBrains Mono"', ...defaultTheme.fontFamily.mono],
             },
             maxWidth: {

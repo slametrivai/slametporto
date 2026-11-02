@@ -91,6 +91,8 @@ class ProjectGalleryTest extends TestCase
     public function test_public_page_renders_gallery_with_lightbox(): void
     {
         $project = Project::first();
+        Storage::disk('public')->put('projects/gallery/a.jpg', 'img');
+        Storage::disk('public')->put('projects/gallery/b.jpg', 'img');
         $project->images()->create(['path' => 'projects/gallery/a.jpg', 'title' => 'OCR review queue', 'description' => 'Low-confidence documents wait here.', 'sort_order' => 1]);
         $project->images()->create(['path' => 'projects/gallery/b.jpg', 'sort_order' => 2]);
 
@@ -108,6 +110,7 @@ class ProjectGalleryTest extends TestCase
     {
         $project = Project::first();
         foreach (range(1, 5) as $i) {
+            Storage::disk('public')->put("projects/gallery/{$i}.jpg", 'img');
             $project->images()->create(['path' => "projects/gallery/{$i}.jpg", 'sort_order' => $i]);
         }
 

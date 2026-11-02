@@ -5,10 +5,10 @@
 @layer base {
     html {
         scroll-behavior: smooth;
-        scroll-padding-top: 5.5rem; /* clears the sticky 76px header on anchor jumps */
+        scroll-padding-top: 6.5rem; /* clears the sticky nav pill on anchor jumps */
         overflow-x: clip;
-        background-color: theme('colors.void.DEFAULT');
-        color: theme('colors.content.DEFAULT');
+        background-color: theme('colors.white');
+        color: theme('colors.body');
     }
     /* Public pages: from 1024px up the layout is the 1440px design scaled to the viewport, so the
        composition is identical on every desktop screen. All sizes are rem; 16px at 1440px and wider. */
@@ -19,118 +19,137 @@
     }
     body {
         overflow-x: clip;
-        background-color: theme('colors.void.DEFAULT');
-        color: theme('colors.content.DEFAULT');
+        background-color: theme('colors.white');
+        color: theme('colors.body');
     }
     ::selection {
-        background-color: theme('colors.accent.DEFAULT');
-        color: theme('colors.void.DEFAULT');
+        background-color: theme('colors.brand.DEFAULT');
+        color: theme('colors.white');
     }
-    /* One visible focus style for every link, button and field (18.5:1 on navy). */
+    /* One visible focus style for every link, button and field. */
     :focus-visible {
-        outline: 2px solid theme('colors.accent.DEFAULT');
+        outline: 2px solid theme('colors.brand.DEFAULT');
         outline-offset: 2px;
+    }
+    .on-dark :focus-visible,
+    .band-dark :focus-visible,
+    .band-dark-top :focus-visible {
+        outline-color: theme('colors.sky.DEFAULT');
+    }
+    .theme-studio :focus-visible {
+        outline-color: theme('colors.accent.DEFAULT');
     }
 }
 
 @layer components {
-    /* 1440 frame with 80px gutters from the design, collapsing to 16px on phones. */
+    /* 1440 frame with 80px gutters from the design, collapsing to 20px on phones. */
     .page-container {
-        @apply mx-auto w-full max-w-page px-4 sm:px-8 lg:px-20;
+        @apply mx-auto w-full max-w-page px-5 sm:px-8 lg:px-20;
     }
     .eyebrow {
-        @apply text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-content-secondary;
+        @apply text-sm font-bold uppercase tracking-[0.1em] text-brand lg:text-[0.9375rem];
     }
     .section-title {
-        @apply text-[2rem] font-bold leading-[1.15] tracking-[-0.025em] text-content sm:text-[2.5rem];
-    }
-    .link-accent {
-        @apply inline-flex min-h-11 items-center gap-2 text-[0.9375rem] font-medium text-accent transition hover:text-accent-hover;
+        @apply text-[2.125rem] font-semibold leading-[2.4375rem] text-navy lg:text-[3.25rem] lg:leading-[3.75rem];
     }
     .btn-primary {
-        @apply inline-flex min-h-11 items-center justify-center gap-2.5 rounded-[0.625rem] bg-accent px-6 text-[0.9375rem] font-semibold text-void transition hover:bg-accent-hover;
+        @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand px-7 text-base font-bold text-white transition-colors hover:bg-brand-dark;
     }
     .btn-outline {
-        @apply inline-flex min-h-11 items-center justify-center gap-2.5 rounded-[0.625rem] border border-edge px-6 text-[0.9375rem] font-medium text-content transition hover:border-content-faint;
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-line px-[1.125rem] text-[0.9375rem] font-bold text-navy transition-colors hover:bg-panel;
     }
-    .panel {
-        @apply rounded-2xl border border-edge;
+    .link-brand {
+        @apply inline-flex min-h-11 items-center gap-2 text-base font-bold text-brand transition-colors hover:text-brand-dark;
     }
-    .chip {
-        @apply inline-flex items-center gap-1.5 rounded-full px-3 py-[0.3125rem] text-[0.8125rem] font-medium;
+    /* Navy band with a blue wash from the bottom-right corner. */
+    .band-dark {
+        @apply bg-ink bg-no-repeat text-mist;
+        background-image: radial-gradient(ellipse 65% 65% at 100% 100%, theme('colors.brand.glow / 30%') 0%, transparent 100%);
+    }
+    /* Same band with the wash centered on the top edge. */
+    .band-dark-top {
+        @apply bg-ink bg-no-repeat text-mist;
+        background-image: radial-gradient(ellipse 60% 55% at 50% 0%, theme('colors.brand.glow / 25%') 0%, transparent 100%);
+    }
+    .glass-card {
+        @apply bg-white/[0.08] ring-1 ring-inset ring-white/20;
     }
     .pill-tab {
-        @apply inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-3.5 text-sm transition;
+        @apply inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-[1.125rem] text-[0.9375rem] transition-colors;
     }
-    /* Long-form article typography (Markdown output), from the Writing — Article Detail frame. */
+    .chip {
+        @apply inline-flex items-center gap-1.5 rounded-full bg-panel px-3 py-[0.3125rem] text-sm font-bold text-navy;
+    }
+    .icon-chip {
+        @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand/[0.12] text-brand;
+    }
+    /* Long-form article typography (Markdown output), from the Opsi B Article Detail frame. */
     .article-body {
-        @apply text-[1.0625rem] leading-[1.875rem] text-content-body sm:text-lg sm:leading-8;
+        @apply text-[1.0625rem] leading-[1.75rem] text-body lg:text-lg lg:leading-[1.9375rem];
     }
     .article-body > * + * {
-        @apply mt-6;
+        @apply mt-[1.125rem];
     }
     .article-body h2 {
-        @apply scroll-mt-28 pt-6 text-[1.625rem] font-bold leading-[1.27] tracking-[-0.02em] text-content sm:text-[1.875rem];
+        @apply scroll-mt-28 pt-4 text-[1.75rem] font-semibold leading-[2.125rem] text-navy lg:text-[2.25rem] lg:leading-[2.6875rem];
     }
     .article-body h3 {
-        @apply scroll-mt-28 pt-2 text-[1.375rem] font-semibold leading-snug text-content;
+        @apply scroll-mt-28 pt-2 text-[1.375rem] font-semibold leading-7 text-navy lg:text-2xl lg:leading-[1.875rem];
     }
     .article-body a {
-        @apply text-accent underline decoration-accent/40 underline-offset-4 transition hover:decoration-accent;
+        @apply font-semibold text-brand underline decoration-line underline-offset-4 transition-colors hover:text-brand-dark;
     }
     .article-body strong {
-        @apply font-semibold text-content;
+        @apply font-bold text-navy;
     }
     .article-body ul > li {
         @apply relative pl-5;
     }
     .article-body ul > li::before {
         content: '';
-        @apply absolute left-0 top-[0.8125rem] h-1.5 w-1.5 rounded-full bg-accent;
+        @apply absolute left-0 top-[0.8125rem] h-1.5 w-1.5 rounded-full bg-brand;
     }
     .article-body ol {
-        @apply list-decimal pl-6 marker:font-semibold marker:text-accent;
+        @apply list-decimal pl-6 marker:font-bold marker:text-brand;
     }
     .article-body li + li {
-        @apply mt-4;
+        @apply mt-3;
     }
     .article-body :not(pre) > code {
-        @apply rounded-md bg-surface-raised px-1.5 py-0.5 font-mono text-[0.85em] text-content;
+        @apply rounded-md bg-panel px-1.5 py-0.5 font-mono text-[0.85em] text-navy;
     }
     .article-body pre {
-        @apply overflow-x-auto px-5 py-[1.125rem] font-mono text-sm leading-6 text-[#E5C07B];
+        @apply overflow-x-auto px-5 py-[1.125rem] font-mono text-sm leading-6 text-mist;
     }
     .article-body .code-block {
-        @apply overflow-hidden rounded-[0.875rem] border border-edge bg-surface-inset;
+        @apply overflow-hidden rounded-[1.125rem] bg-ink;
     }
     .article-body > pre {
-        @apply rounded-[0.875rem] border border-edge bg-surface-inset;
+        @apply rounded-[1.125rem] bg-ink;
     }
     .article-body blockquote {
-        @apply rounded-xl border-l-[3px] border-accent bg-surface px-6 py-5 text-[1.0625rem] leading-7 text-content;
+        @apply rounded-[1.125rem] border-l-[3px] border-brand bg-panel px-6 py-5 text-navy;
     }
     .article-body blockquote > * + * {
         @apply mt-3;
     }
     .article-body hr {
-        @apply my-10 border-edge;
+        @apply my-10 border-line;
     }
     .article-body img {
-        @apply rounded-[0.875rem] border border-edge;
+        @apply rounded-[1.125rem] border border-line;
     }
     .article-body table {
-        @apply w-full text-left text-[0.9375rem];
+        @apply w-full border-separate border-spacing-0 overflow-hidden rounded-[1.125rem] border border-line text-left text-base leading-[1.375rem];
     }
     .article-body th {
-        @apply border-b border-edge py-2 pr-4 font-semibold text-content;
+        @apply bg-navy p-3.5 font-bold text-white;
     }
     .article-body td {
-        @apply border-b border-edge py-2 pr-4;
+        @apply p-3.5 font-medium;
     }
-
-    /* Amber wash in the top-right corner of CTA panels. */
-    .glow-corner {
-        background-image: radial-gradient(ellipse 80% 80% at 100% 0%, theme('colors.accent.DEFAULT / 15%') 0%, transparent 100%);
+    .article-body tbody tr:nth-child(even) {
+        @apply bg-panel;
     }
 }
 
@@ -139,12 +158,12 @@
     height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: theme('colors.void.DEFAULT');
+    background: theme('colors.panel');
 }
 ::-webkit-scrollbar-thumb {
-    background: theme('colors.edge');
+    background: theme('colors.line');
     border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: theme('colors.accent.deep');
+    background: theme('colors.brand.DEFAULT');
 }

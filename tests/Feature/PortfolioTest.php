@@ -33,7 +33,7 @@ class PortfolioTest extends TestCase
         $response->assertSee('Slamet Rivai');
         $response->assertSee('Operations &amp; Systems Leader', false);
         $response->assertSee('Bekasi, Indonesia');
-        $response->assertSeeInOrder([
+        $response->assertSeeTextInOrder([
             'Systems that moved the numbers',
             '9 years of making operations measurable.',
             'The stack I run operations on',
@@ -104,7 +104,7 @@ class PortfolioTest extends TestCase
     {
         $response = $this->get('/blog');
         $response->assertStatus(200);
-        $response->assertSee('Field notes from the ops floor');
+        $response->assertSeeText('Field notes from the ops floor');
         $response->assertSee('Browse by topic');
 
         // Filter by category

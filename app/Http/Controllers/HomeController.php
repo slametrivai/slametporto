@@ -14,7 +14,7 @@ class HomeController extends Controller
     public function index(): View
     {
         $careers = Career::orderBy('sort_order', 'asc')->get();
-        $projects = Project::orderBy('sort_order', 'asc')->get();
+        $projects = Project::with('images')->orderBy('sort_order', 'asc')->get();
         $clients = Client::where('is_active', true)->orderBy('sort_order', 'asc')->get();
         $certifications = Certification::all();
         $latestPosts = Post::published()->with('category')->latest('published_at')->take(3)->get();

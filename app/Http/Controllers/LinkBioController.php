@@ -10,15 +10,11 @@ class LinkBioController extends Controller
 {
     public function show(): View
     {
-        $projects = Project::orderBy('sort_order')->get();
-        $featured = $projects->firstWhere('is_featured', true) ?? $projects->first();
-        $nextProject = $featured
-            ? ($projects->where('id', '!=', $featured->id)->firstWhere('is_featured', true) ?? $projects->firstWhere('id', '!=', $featured->id))
-            : null;
+        $projects = Project::with('images')->orderByDesc('is_featured')->orderBy('sort_order')->get();
 
         return view('linkbio', [
-            'featured' => $featured,
-            'nextProject' => $nextProject,
+            'featured' => $projects->first(),
+            'moreProjects' => $projects->slice(1, 2)->values(),
             'latestPost' => Post::published()->latest('published_at')->first(),
         ]);
     }

@@ -1,22 +1,24 @@
-{{-- Index page header: breadcrumb, title, lead and headline counts. --}}
-<header class="page-container flex flex-col justify-between gap-10 pb-12 pt-14 sm:pt-[5.5rem] lg:flex-row lg:items-end">
-    <div class="max-w-[47.5rem]">
-        <nav aria-label="Breadcrumb">
-            <ol class="flex items-center gap-2 text-[0.8125rem]">
-                <li><a href="{{ route('home') }}" class="text-content-secondary transition hover:text-content">Home</a></li>
-                <li aria-hidden="true"><x-lucide-chevron-right class="h-3.5 w-3.5 text-content-faint" /></li>
-                <li aria-current="page" class="font-medium text-content">{{ $current }}</li>
-            </ol>
-        </nav>
-        <h1 class="mt-4 text-[2.5rem] font-bold leading-[1.07] tracking-[-0.03em] text-content sm:text-[3.5rem]">{{ $title }}</h1>
-        <p class="mt-4 text-[1.0625rem] leading-[1.8125rem] text-content-secondary sm:text-lg">{{ $lead }}</p>
+{{-- Index page header: breadcrumb, two-tone title, lead and headline counts. $accent is the blue part of the title. --}}
+<header class="page-container flex flex-col gap-6 pb-6 pt-10 lg:pt-14">
+    <nav aria-label="Breadcrumb">
+        <ol class="flex items-center gap-2 text-[0.9375rem]">
+            <li><a href="{{ route('home') }}" class="font-medium text-body transition-colors hover:text-brand">Home</a></li>
+            <li aria-hidden="true"><x-lucide-chevron-right class="h-4 w-4 text-body" /></li>
+            <li aria-current="page" class="font-bold text-navy">{{ $current }}</li>
+        </ol>
+    </nav>
+    <div class="flex flex-col justify-between gap-6 lg:flex-row lg:items-end lg:gap-[3.75rem]">
+        <div class="flex max-w-[56.25rem] flex-col gap-3">
+            <h1 class="text-[2.75rem] font-semibold leading-[1.1] tracking-[-0.0625rem] text-navy lg:text-[4.25rem]">{{ $title }} <span class="text-brand">{{ $accent }}</span></h1>
+            <p class="text-base leading-6 text-body lg:text-lg lg:leading-[1.6875rem]">{{ $lead }}</p>
+        </div>
+        <dl class="flex shrink-0 gap-10">
+            @foreach($counts as $label => $value)
+                <div class="flex flex-col-reverse gap-0.5">
+                    <dt class="text-[0.9375rem] text-body">{{ $label }}</dt>
+                    <dd class="text-[2.25rem] font-bold leading-tight text-brand">{{ $value }}</dd>
+                </div>
+            @endforeach
+        </dl>
     </div>
-    <dl class="flex gap-10">
-        @foreach($counts as $label => $value)
-            <div class="flex flex-col-reverse gap-1">
-                <dt class="text-[0.8125rem] text-content-secondary">{{ $label }}</dt>
-                <dd class="text-4xl font-bold tracking-[-0.03em] text-content">{{ $value }}</dd>
-            </div>
-        @endforeach
-    </dl>
 </header>

@@ -27,6 +27,12 @@
                 </div>
 
                 <div>
+                    <label for="cover_word" class="admin-label">Kata di thumbnail</label>
+                    <input id="cover_word" type="text" name="cover_word" value="{{ old('cover_word', $post->cover_word ?? '') }}" maxlength="20" class="admin-input" placeholder="Contoh: Leads" aria-describedby="cover-word-help">
+                    <p id="cover-word-help" class="admin-help">Satu kata besar di blok warna saat artikel tidak punya cover. Kosongkan untuk memakai kata terakhir judul.</p>
+                </div>
+
+                <div>
                     <label for="content" class="admin-label">Isi artikel <span class="text-error-600">*</span></label>
                     <p class="admin-help mb-2 mt-0">Beri judul tiap bagian lewat menu format: Subjudul (Heading 2) atau Sub-subjudul (Heading 3). Subjudul itulah yang muncul sebagai Table of Contents di halaman artikel.</p>
                     <textarea id="content" name="content" rows="18">{{ old('content', $post?->content) }}</textarea>

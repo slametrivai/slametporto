@@ -51,6 +51,8 @@ class Client extends Model
             (bool) preg_match('/travel|hospitality/i', $this->industry) => 'plane',
             (bool) preg_match('/health|medic/i', $this->industry) => 'heart-pulse',
             (bool) preg_match('/educat|ngo/i', $this->industry) => 'graduation-cap',
+            (bool) preg_match('/entertain|media/i', $this->industry) => 'clapperboard',
+            (bool) preg_match('/garment|fashion|textile/i', $this->industry) => 'shirt',
             default => 'briefcase',
         };
     }

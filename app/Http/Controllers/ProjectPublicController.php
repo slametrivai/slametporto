@@ -66,7 +66,7 @@ class ProjectPublicController extends Controller
         $project = Project::with('images')->where('slug', $slug)->firstOrFail();
 
         // Related or other case studies for navigation
-        $otherProjects = Project::where('id', '!=', $project->id)
+        $otherProjects = Project::with('images')->where('id', '!=', $project->id)
             ->orderBy('sort_order', 'asc')
             ->take(3)
             ->get();
