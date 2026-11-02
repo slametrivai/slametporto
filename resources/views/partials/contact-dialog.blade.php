@@ -64,7 +64,7 @@
             </span>
             <h2 class="text-[1.75rem] font-semibold text-navy sm:text-[2.125rem]">Message sent</h2>
             <p class="text-center text-[1.0625rem] leading-[1.625rem] text-body">
-                Thanks, <span x-text="sent.firstName"></span>. Your message is in my inbox. I'll reply to <span class="break-all" x-text="sent.email"></span>.
+                Thanks, <span x-text="sent.firstName"></span>. Your message is in my inbox. I'll reply to <span class="break-words" x-text="sent.email"></span>.
             </p>
             <dl class="flex w-full justify-center gap-1.5 rounded-2xl bg-panel px-4 py-3 text-[0.9375rem]">
                 <dt class="shrink-0 text-body">From</dt>
