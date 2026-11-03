@@ -76,9 +76,9 @@ class Category extends Model
         $fallbackDesc = $this->description ?: "Kumpulan {$typeName} kategori {$this->name} oleh Slamet Rivai, Operations & Systems Leader.";
 
         $targetUrl = match ($this->type) {
-            'project' => route('projects.index', ['category' => $this->name]),
+            'project' => Project::categoryUrl($this->name),
             'client' => route('home') . '#clients',
-            default => route('blog.index', ['category' => $this->slug]),
+            default => route('blog.category', $this->slug),
         };
 
         return new SEOData(

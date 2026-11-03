@@ -218,7 +218,7 @@
                         <ul class="mt-2.5 space-y-1">
                             <li><a href="{{ route('blog.index') }}" class="{{ $footLink }}">All articles</a></li>
                             @foreach($footerTopics as $topic)
-                                <li><a href="{{ route('blog.index', ['category' => $topic->slug]) }}" class="{{ $footLink }}">{{ $topic->name }}</a></li>
+                                <li><a href="{{ route('blog.category', $topic->slug) }}" class="{{ $footLink }}">{{ $topic->name }}</a></li>
                             @endforeach
                         </ul>
                     </div>

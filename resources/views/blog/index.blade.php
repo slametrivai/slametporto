@@ -1,12 +1,12 @@
 @extends('layouts.public')
 
-@section('title', 'Writing | Slamet Rivai')
+@section('title', (($categories->firstWhere('slug', $categorySlug)?->name ?? null) ? $categories->firstWhere('slug', $categorySlug)->name . ' Articles' : 'Writing') . ' | Slamet Rivai')
 @section('meta_description', 'Field notes on queue reliability, CRM architecture, OCR pipelines and production post-mortems from running customer operations.')
 
 @php
     $tabs = [['label' => 'All topics', 'count' => $totals['articles'], 'url' => route('blog.index', array_filter(['q' => $search])), 'active' => empty($categorySlug)]];
     foreach ($categories->where('posts_count', '>', 0) as $cat) {
-        $tabs[] = ['label' => $cat->name, 'count' => $cat->posts_count, 'url' => route('blog.index', array_filter(['category' => $cat->slug, 'q' => $search])), 'active' => $categorySlug === $cat->slug];
+        $tabs[] = ['label' => $cat->name, 'count' => $cat->posts_count, 'url' => route('blog.category', ['category' => $cat->slug] + array_filter(['q' => $search])), 'active' => $categorySlug === $cat->slug];
     }
     $activeCategory = $categories->firstWhere('slug', $categorySlug);
 @endphp
@@ -23,8 +23,8 @@
     @include('partials.filter-bar', [
         'label' => 'Filter by topic',
         'tabs' => $tabs,
-        'action' => route('blog.index'),
-        'hidden' => ['category' => $categorySlug, 'sort' => $sort === 'newest' ? null : $sort],
+        'action' => $categorySlug ? route('blog.category', $categorySlug) : route('blog.index'),
+        'hidden' => ['sort' => $sort === 'newest' ? null : $sort],
         'search' => $search,
         'placeholder' => 'Search articles…',
     ])
@@ -97,7 +97,7 @@
                             <span class="text-[0.9375rem] font-semibold text-body">{{ $cat->posts_count }} {{ Str::plural('article', $cat->posts_count) }}</span>
                         </div>
                         <h3 class="text-[1.5rem] font-semibold text-navy lg:text-[1.625rem]">
-                            <a href="{{ route('blog.index', ['category' => $cat->slug]) }}" class="after:absolute after:inset-0">{{ $cat->name }}</a>
+                            <a href="{{ route('blog.category', $cat->slug) }}" class="after:absolute after:inset-0">{{ $cat->name }}</a>
                         </h3>
                         @if($cat->description)
                             <p class="text-[0.9375rem] leading-[1.4375rem] text-body">{{ $cat->description }}</p>

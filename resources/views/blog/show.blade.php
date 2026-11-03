@@ -21,7 +21,7 @@
 
         <p class="flex flex-wrap items-center gap-3">
             @if($post->category)
-                <a href="{{ route('blog.index', ['category' => $post->category->slug]) }}" class="chip px-3.5 py-1.5 transition-colors hover:bg-line/50">{{ $post->category->name }}</a>
+                <a href="{{ route('blog.category', $post->category->slug) }}" class="chip px-3.5 py-1.5 transition-colors hover:bg-line/50">{{ $post->category->name }}</a>
             @endif
             <span class="text-[0.9375rem] font-semibold text-body">
                 <time datetime="{{ $post->published_at?->toDateString() }}">{{ $post->published_at?->format('d F Y') }}</time> · {{ $post->reading_time }} min read

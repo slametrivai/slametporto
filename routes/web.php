@@ -25,8 +25,10 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/projects', [ProjectPublicController::class, 'index'])->name('projects.index');
+Route::get('/projects/category/{category}', [ProjectPublicController::class, 'index'])->name('projects.category');
 Route::get('/projects/{slug}', [ProjectPublicController::class, 'show'])->name('projects.show');
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/topic/{category}', [BlogController::class, 'index'])->name('blog.category');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 Route::get('/resume', [ResumeController::class, 'show'])->name('resume.show');

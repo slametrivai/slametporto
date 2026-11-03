@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Project;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -14,9 +15,15 @@ class BlogController extends Controller
 {
     public const SORTS = ['newest' => 'Newest first', 'oldest' => 'Oldest first', 'popular' => 'Most read'];
 
-    public function index(Request $request): View
+    public function index(Request $request, ?string $category = null): View|RedirectResponse
     {
-        $categorySlug = $request->query('category');
+        // Old ?category=slug links: permanent redirect to the path URL.
+        if ($legacy = $request->query('category')) {
+            return redirect()->route('blog.category', ['category' => $legacy] + $request->except('category'), 301);
+        }
+
+        $categorySlug = $category;
+        abort_if($categorySlug !== null && ! Category::forPosts()->where('slug', $categorySlug)->exists(), 404);
         $search = $request->query('q');
         $sort = array_key_exists($request->query('sort'), self::SORTS) ? $request->query('sort') : 'newest';
 

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use RalphJSmit\Laravel\SEO\Support\HasSEO;
 use RalphJSmit\Laravel\SEO\Support\SEOData;
 
@@ -41,6 +42,12 @@ class Project extends Model
             'is_featured' => 'boolean',
             'sort_order' => 'integer',
         ];
+    }
+
+    /** Clean URL for a category listing, e.g. /projects/category/digital-experience. */
+    public static function categoryUrl(string $name, array $query = []): string
+    {
+        return route('projects.category', ['category' => Str::slug($name)] + array_filter($query));
     }
 
     public function images(): HasMany

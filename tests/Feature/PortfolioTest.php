@@ -90,7 +90,7 @@ class PortfolioTest extends TestCase
 
         // Filter by category
         $project = Project::first();
-        $responseCat = $this->get('/projects?category=' . urlencode($project->category));
+        $responseCat = $this->get(Project::categoryUrl($project->category));
         $responseCat->assertStatus(200);
         $responseCat->assertSee($project->title);
 
@@ -108,7 +108,7 @@ class PortfolioTest extends TestCase
         $response->assertSee('Browse by topic');
 
         // Filter by category
-        $responseCat = $this->get('/blog?category=workflow-automation');
+        $responseCat = $this->get('/blog/topic/workflow-automation');
         $responseCat->assertStatus(200);
 
         // Search

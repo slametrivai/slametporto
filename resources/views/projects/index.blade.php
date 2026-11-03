@@ -1,13 +1,13 @@
 @extends('layouts.public')
 
-@section('title', 'Case Studies | Slamet Rivai')
+@section('title', ($selectedCategory ? $selectedCategory . ' Case Studies' : 'Case Studies') . ' | Slamet Rivai')
 @section('meta_description', 'Production systems case studies: OCR document pipelines, WhatsApp Cloud API engines, omnichannel CRM architectures, and workforce automation.')
 
 @php
     $allActive = empty($selectedCategory) || $selectedCategory === 'All';
     $tabs = [['label' => 'All', 'count' => $totals['case studies'], 'url' => route('projects.index', array_filter(['q' => $search, 'sort' => $sort === 'featured' ? null : $sort])), 'active' => $allActive]];
     foreach ($categoriesWithCount as $catName => $count) {
-        $tabs[] = ['label' => $catName, 'count' => $count, 'url' => route('projects.index', array_filter(['category' => $catName, 'q' => $search, 'sort' => $sort === 'featured' ? null : $sort])), 'active' => $selectedCategory === $catName];
+        $tabs[] = ['label' => $catName, 'count' => $count, 'url' => \App\Models\Project::categoryUrl($catName, ['q' => $search, 'sort' => $sort === 'featured' ? null : $sort]), 'active' => $selectedCategory === $catName];
     }
 @endphp
 
@@ -23,8 +23,8 @@
     @include('partials.filter-bar', [
         'label' => 'Filter by category',
         'tabs' => $tabs,
-        'action' => route('projects.index'),
-        'hidden' => ['category' => $allActive ? null : $selectedCategory, 'sort' => $sort === 'featured' ? null : $sort],
+        'action' => $allActive ? route('projects.index') : \App\Models\Project::categoryUrl($selectedCategory),
+        'hidden' => ['sort' => $sort === 'featured' ? null : $sort],
         'search' => $search,
         'placeholder' => 'Search systems or tools…',
     ])
